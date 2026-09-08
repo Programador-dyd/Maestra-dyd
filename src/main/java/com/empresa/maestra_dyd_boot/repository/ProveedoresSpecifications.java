@@ -1,0 +1,46 @@
+package com.empresa.maestra_dyd_boot.repository;
+
+import com.empresa.maestra_dyd_boot.model.Proveedores;
+import org.springframework.data.jpa.domain.Specification;
+
+import java.time.LocalDate;
+
+public class ProveedoresSpecifications {
+
+    private ProveedoresSpecifications() {
+    }
+
+    public static Specification<Proveedores> conFiltros(String buscador, LocalDate fechaPrograma,
+                                                          LocalDate fechaSiesa, String estadoDocumentacion,
+                                                          String estado) {
+
+        return (root, query, cb) -> {
+            var predicados = cb.conjunction();
+
+            if (buscador != null && !buscador.isBlank()) {
+                String patron = "%" + buscador.toLowerCase() + "%";
+                var porNit = cb.like(cb.lower(root.get("nitProveedor")), patron);
+                var porRazonSocial = cb.like(cb.lower(root.get("razonSocial")), patron);
+                predicados = cb.and(predicados, cb.or(porNit, porRazonSocial));
+            }
+
+            if (fechaPrograma != null) {
+                predicados = cb.and(predicados, cb.equal(root.get("fechaPrograma"), fechaPrograma));
+            }
+
+            if (fechaSiesa != null) {
+                predicados = cb.and(predicados, cb.equal(root.get("fechaSiesa"), fechaSiesa));
+            }
+
+            if (estadoDocumentacion != null && !estadoDocumentacion.isBlank()) {
+                predicados = cb.and(predicados, cb.equal(root.get("estadoDocumentacion"), estadoDocumentacion));
+            }
+
+            if (estado != null && !estado.isBlank()) {
+                predicados = cb.and(predicados, cb.equal(root.get("estado"), estado));
+            }
+
+            return predicados;
+        };
+    }
+}

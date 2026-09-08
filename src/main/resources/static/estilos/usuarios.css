@@ -1,0 +1,234 @@
+/* ====== ESTILOS GENERALES ====== */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #ffffff;
+    color: #0a2342;
+    margin: 0;
+    padding: 30px;
+}
+
+/* ====== TÍTULO ====== */
+h3 {
+    color: #1e3a8a;
+    text-align: center;
+    font-size: 26px;
+    letter-spacing: 1px;
+    margin-bottom: 20px;
+}
+
+/* ====== TABLA ====== */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: #f9f9f9;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* Encabezado de tabla */
+th {
+    background-color: #1e3a8a;
+    color: white;
+    padding: 12px;
+    text-align: left;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 14px;
+}
+
+/* Celdas */
+td {
+    padding: 10px 15px;
+    border-bottom: 1px solid #d0d7e2;
+    font-size: 15px;
+    vertical-align: middle;
+}
+
+/* Alternar color filas */
+tr:nth-child(even) {
+    background-color: #eef1f8;
+}
+
+/* Hover fila */
+tr:hover {
+    background-color: #e0e7ff;
+    transition: background-color 0.2s ease;
+}
+
+/* ====== ICONOS UNIFICADOS ====== */
+td img,
+table td img,
+form td img {
+    width: 35px;
+    height: 35px;
+    cursor: pointer;
+    transition: transform 0.2s ease, filter 0.2s ease;
+    margin-right: 5px;
+    vertical-align: middle;
+}
+
+td img:hover {
+    transform: scale(1.1);
+    filter: brightness(1.2);
+}
+
+/* ====== MENSAJES ====== */
+p {
+    text-align: right;
+    margin-bottom: 10px;
+}
+
+/* ====== RESPONSIVE ====== */
+@media (max-width: 768px) {
+    table, thead, tbody, th, td, tr {
+        display: block;
+    }
+
+    tr {
+        margin-bottom: 15px;
+        border: 1px solid #d0d7e2;
+        border-radius: 8px;
+        background-color: #ffffff;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+
+    th {
+        display: none;
+    }
+
+    td {
+        display: flex;
+        justify-content: space-between;
+        padding: 10px;
+        border: none;
+        border-bottom: 1px solid #e3e8f0;
+    }
+
+    td:last-child {
+        border-bottom: none;
+    }
+
+    td::before {
+        content: attr(data-label);
+        font-weight: bold;
+        color: #1e3a8a;
+    }
+}
+
+/* ====== BOTONES ====== */
+.btn-J {
+    display: inline-block;
+    background-color: #a61c1c;
+    color: white;
+    padding: 8px 15px;
+    border-radius: 5px;
+    text-decoration: none;
+    font-weight: bold;
+    transition: background-color 0.2s;
+}
+
+.btn-con {
+    display: inline-block;
+    background-color: #1e3a8a;
+    color: white;
+    padding: 8px 15px;
+    border-radius: 5px;
+    text-decoration: none;
+    font-weight: bold;
+    transition: background-color 0.2s;
+}
+
+.btn-con:hover {
+    background-color: #0078d7;
+}
+
+/* Botones generales */
+button {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    font-size: 14px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: 0.3s;
+    margin: 3px;
+}
+
+button:hover {
+    background-color: #0056b3;
+    transform: translateY(-2px);
+}
+
+button.agregar {
+    background-color: #28a745;
+}
+button.agregar:hover {
+    background-color: #1e7e34;
+}
+
+button.modificar {
+    background-color: #ffc107;
+    color: #333;
+}
+button.modificar:hover {
+    background-color: #e0a800;
+}
+
+button.eliminar {
+    background-color: #dc3545;
+}
+button.eliminar:hover {
+    background-color: #b52a37;
+}
+/* Contenedor general del buscador */
+.buscador-container {
+    background: #eaf4ff;      /* Azul MUY suave */
+    padding: 15px;
+    border-radius: 10px;
+    border: 1px solid #c7ddf5; /* borde azul claro */
+    margin-bottom: 20px;
+}
+
+/* Etiquetas */
+.buscador-container label {
+    font-weight: bold;
+    color: #3a5f8a;         /* azul medio */
+    margin-right: 10px;
+}
+
+/* Inputs y select */
+.buscador-container input[type="text"],
+.buscador-container input[type="date"],
+.buscador-container select {
+    padding: 6px 10px;
+    border: 1px solid #9ec3e6;
+    border-radius: 6px;
+    background: #ffffff;
+    color: #2a4b70;
+    margin-right: 10px;
+}
+
+/* Sombra suave al enfocar */
+.buscador-container input:focus,
+.buscador-container select:focus {
+    outline: none;
+    border-color: #4c88d8;
+    box-shadow: 0 0 5px rgba(76, 136, 216, 0.4);
+}
+
+/* Botones */
+.buscador-container button {
+    background: #4c88d8;        /* azul intermedio */
+    color: white;
+    border: none;
+    padding: 7px 15px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.buscador-container button:hover {
+    background: #3b75c0;
+}

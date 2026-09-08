@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <title>Ingresar al sistema</title>
+    <link rel="icon" type="image/x-icon" th:href="@{/img/logo.ico}">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600;1,700&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" th:href="@{/estilos/login.css}">
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+</head>
+<body th:classappend="${param.error != null or param.logout != null} ? ' intro-skip' : ' intro-active'">
+
+    <div class="logo-intro" id="logoIntro" aria-hidden="false">
+        <button type="button" class="logo-intro-btn" id="startLoginBtn" aria-label="Entrar al inicio de sesión">
+            <img th:src="@{/img/logo.png}" alt="Logo">
+        </button>
+    </div>
+
+    <div class="card" id="loginCard">
+
+        <div class="logo-box">
+            <img th:src="@{/img/logo.png}" alt="Logo">
+        </div>
+
+        <h2>¡Bienvenido!</h2>
+        <p class="subtitle">Inicia sesión para continuar</p>
+
+        <form method="post" th:action="@{/login}" autocomplete="on">
+
+            <label for="identificacion">Usuario</label>
+            <input id="identificacion"
+                   name="identificacion"
+                   placeholder="Usuario"
+                   required
+                   autocomplete="username" />
+
+            <label for="clave">Contraseña</label>
+
+            <div class="input-row">
+                <input id="clave"
+                       name="clave"
+                       type="password"
+                       placeholder="Ingresa tu contraseña"
+                       required
+                       autocomplete="current-password" />
+
+                <button type="button"
+                        class="toggle-pass"
+                        data-target="clave"
+                        aria-label="Mostrar contraseña"
+                        aria-pressed="false">
+
+                    <svg class="icon-eye icon-show" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/>
+                        <circle cx="12" cy="12" r="3"/>
+                    </svg>
+
+                    <svg class="icon-eye icon-hide" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M9.88 9.88A3 3 0 0 0 14.12 14.12"/>
+                        <path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c6.5 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68"/>
+                        <path d="M6.61 6.61C3.8 8.5 2 12 2 12s3.5 7 10 7a9.74 9.74 0 0 0 5.39-1.61"/>
+                        <line x1="2" y1="2" x2="22" y2="22"/>
+                    </svg>
+                </button>
+            </div>
+
+            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+
+            <button type="submit" class="login-submit">Ingresar</button>
+        </form>
+
+        <div class="msg msg-error" th:if="${param.error}">
+            Usuario o clave incorrectos
+        </div>
+
+        <div class="msg msg-info" th:if="${param.logout}">
+            Sesión cerrada correctamente
+        </div>
+
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            var body = document.body;
+            var intro = document.getElementById('logoIntro');
+            var trigger = document.getElementById('startLoginBtn');
+
+            document.querySelectorAll('.toggle-pass').forEach(function (btn) {
+                btn.addEventListener('click', function () {
+                    var inputId = btn.getAttribute('data-target');
+                    var input = document.getElementById(inputId);
+                    if (!input) return;
+                    var show = input.type === 'password';
+                    input.type = show ? 'text' : 'password';
+                    btn.classList.toggle('is-visible', show);
+                    btn.setAttribute('aria-pressed', show ? 'true' : 'false');
+                    btn.setAttribute('aria-label', show ? 'Ocultar contraseña' : 'Mostrar contraseña');
+                });
+            });
+
+            if (!intro || !trigger || !body.classList.contains('intro-active')) {
+                return;
+            }
+
+            var autoRevealTimer = null;
+
+            function revealLogin() {
+                if (!body.classList.contains('intro-active')) return;
+                if (autoRevealTimer) {
+                    window.clearTimeout(autoRevealTimer);
+                    autoRevealTimer = null;
+                }
+                body.classList.add('intro-exit');
+                window.setTimeout(function () {
+                    body.classList.remove('intro-active', 'intro-exit');
+                    intro.setAttribute('aria-hidden', 'true');
+                    intro.style.display = 'none';
+                    var userInput = document.querySelector('input[name="identificacion"]');
+                    if (userInput) userInput.focus();
+                }, 520);
+            }
+
+            trigger.addEventListener('click', revealLogin);
+            trigger.addEventListener('keydown', function (e) {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    revealLogin();
+                }
+            });
+
+            autoRevealTimer = window.setTimeout(revealLogin, 1500);
+        });
+    </script>
+</body>
+</html>

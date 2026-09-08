@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" type="text/css" th:href="@{/estilos/layout.css}">
+    <link rel="stylesheet" type="text/css" th:href="@{/estilos/modulos.css}">
+    <title>Acreedores</title>
+</head>
+<body>
+
+    <header th:replace="~{fragments/topbar :: topbar('acreedores')}"></header>
+
+    <aside th:replace="~{fragments/sidebar :: sidebar('acreedores')}"></aside>
+
+    <main>
+
+        <div class="page-head">
+            <div class="page-head-left">
+                <div class="page-icon">
+                    <img th:src="@{/img/logo.png}" alt="">
+                </div>
+                <div>
+                    <h1>Lista de acreedores</h1>
+                    <p class="subtitle-main">Gestiona la información de tus acreedores</p>
+                </div>
+            </div>
+            <div class="actions">
+                <a th:if="${estado != 'Inactivo'}" th:href="@{/acreedores(estado='Inactivo')}" class="btn">Ver inactivos</a>
+                <a th:if="${estado == 'Inactivo'}" th:href="@{/acreedores(estado='Activo')}" class="btn">Mostrar activos</a>
+                <a th:href="@{/acreedoresFormulario}" class="btn primary">Nuevo acreedor</a>
+            </div>
+        </div>
+
+        <form method="get" th:action="@{/acreedores}" class="filters">
+            <div class="field">
+                <label>Buscar nit/razón social</label>
+                <input type="text" name="buscador" th:value="${buscador}" placeholder="Buscar por NIT o Razón Social">
+            </div>
+            <div class="field">
+                <label>Fecha ingreso</label>
+                <input type="date" name="fechaPrograma" th:value="${fechaPrograma}">
+            </div>
+            <div class="field">
+                <label>Fecha ingreso Siesa</label>
+                <input type="date" name="fechaSiesa" th:value="${fechaSiesa}">
+            </div>
+            <div class="field">
+                <label>Estado documento</label>
+                <select name="estadoDocumentacion">
+                    <option value="">Todos</option>
+                    <option value="COMPLETO" th:selected="${estadoDocumentacion == 'COMPLETO'}">Completo</option>
+                    <option value="INCOMPLETO" th:selected="${estadoDocumentacion == 'INCOMPLETO'}">Incompleto</option>
+                </select>
+            </div>
+            <div class="filters-actions">
+                <button type="submit" class="btn primary">Filtrar</button>
+                <a th:href="@{/acreedores}" class="btn">Limpiar</a>
+            </div>
+        </form>
+
+        <div class="table-wrap">
+            <table>
+                <thead>
+                <tr>
+                    <th>Identificación</th>
+                    <th>Nombre / Razón Social</th>
+                    <th>Estado</th>
+                    <th>Estado documentación</th>
+                    <th>Fecha ingreso</th>
+                    <th>Fecha ingreso siesa</th>
+                    <th>Opciones</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="acreedor : ${acreedores}"
+                    th:style="${acreedor.estado == 'Activo' ? 'background-color:#ecfdf3;' : (acreedor.estado == 'Inactivo' ? 'background-color:#fffbea;' : '')}">
+                    <td th:text="${acreedor.nitAcreedor}"></td>
+                    <td th:text="${acreedor.razonSocial}"></td>
+                    <td th:text="${acreedor.estado}"></td>
+                    <td th:text="${acreedor.estadoDocumentacion}"></td>
+                    <td th:text="${acreedor.fechaPrograma}"></td>
+                    <td th:text="${acreedor.fechaSiesa}"></td>
+                    <td>
+                        <div class="options-cell">
+                            <a th:href="@{/acreedoresFormulario(nitAcreedor=${acreedor.nitAcreedor})}" title="Modificar" class="row-icon">
+                                <img src="/iconos/icon-editar.png" width="28" height="28">
+                            </a>
+                            <a th:href="@{/documentos-acreedor/{nit}(nit=${acreedor.nitAcreedor})}" title="Ver Documentos" class="row-icon">
+                                <img src="/iconos/icon-ver.png" width="28" height="28">
+                            </a>
+
+                            <form th:if="${acreedor.estado == 'Activo'}"
+                                  th:action="@{/acreedores/{nit}/archivar(nit=${acreedor.nitAcreedor})}" method="post"
+                                  onsubmit="return confirm('¿Desea archivar este acreedor?');">
+                                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                                <button type="submit" title="Archivar" class="row-icon">
+                                    <img src="/iconos/icon-archivar.png" width="28" height="28">
+                                </button>
+                            </form>
+
+                            <form th:if="${acreedor.estado == 'Inactivo'}"
+                                  th:action="@{/acreedores/{nit}/restaurar(nit=${acreedor.nitAcreedor})}" method="post"
+                                  onsubmit="return confirm('¿Desea restaurar este acreedor?');">
+                                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                                <button type="submit" title="Restaurar" class="row-icon">
+                                    <img src="/iconos/icon-restaurar.png" width="28" height="28">
+                                </button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="pagination-bar">
+            <a th:if="${paginaActual > 1}"
+               th:href="@{/acreedores(pagina=${paginaActual - 1}, buscador=${buscador})}" class="btn">Anterior</a>
+
+            <span>Página <strong th:text="${paginaActual}"></strong> de <strong th:text="${totalPaginas}"></strong></span>
+
+            <a th:if="${paginaActual < totalPaginas}"
+               th:href="@{/acreedores(pagina=${paginaActual + 1}, buscador=${buscador})}" class="btn">Siguiente</a>
+
+            <span>Total: <strong th:text="${totalRegistros}"></strong></span>
+        </div>
+
+    </main>
+
+</body>
+</html>

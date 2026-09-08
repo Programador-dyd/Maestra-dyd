@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" type="text/css" th:href="@{/estilos/layout.css}">
+    <link rel="stylesheet" type="text/css" th:href="@{/estilos/modulos.css}">
+    <title>Usuarios</title>
+</head>
+<body>
+
+    <header th:replace="~{fragments/topbar :: topbar('usuarios')}"></header>
+
+    <aside th:replace="~{fragments/sidebar :: sidebar('usuarios')}"></aside>
+
+    <main>
+
+        <div class="page-head">
+            <div class="page-head-left">
+                <div class="page-icon">
+                    <img th:src="@{/img/logo.png}" alt="">
+                </div>
+                <div>
+                    <h1>Lista de usuarios</h1>
+                    <p class="subtitle-main">Gestiona los usuarios del sistema</p>
+                </div>
+            </div>
+            <div class="actions">
+                <a th:href="@{/usuarioFormulario}" class="btn primary">Nuevo usuario</a>
+            </div>
+        </div>
+
+        <div class="table-wrap table-tinted">
+            <table>
+                <thead>
+                <tr>
+                    <th>Identificación</th>
+                    <th>Nombres</th>
+                    <th>Apellidos</th>
+                    <th>Tipo</th>
+                    <th>Opciones</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="usuario : ${usuarios}">
+                    <td th:text="${usuario.identificacion}"></td>
+                    <td th:text="${usuario.nombre}"></td>
+                    <td th:text="${usuario.apellido}"></td>
+                    <td th:text="${usuario.tipoEnObjeto}"></td>
+                    <td>
+                        <div class="options-cell">
+                            <a th:href="@{/usuarioFormulario(identificacion=${usuario.identificacion})}" title="Modificar" class="row-icon">
+                                <img src="/iconos/icon-editar.png" width="28" height="28">
+                            </a>
+
+                            <form th:action="@{/usuarios/{id}/eliminar(id=${usuario.identificacion})}" method="post"
+                                  onsubmit="return confirm('¿Realmente desea eliminar el usuario con identificación ' + this.dataset.id + '?');"
+                                  th:attr="data-id=${usuario.identificacion}">
+                                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                                <button type="submit" title="Eliminar" class="row-icon">
+                                    <img src="/iconos/icon-eliminar.png" width="28" height="28">
+                                </button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+    </main>
+
+</body>
+</html>

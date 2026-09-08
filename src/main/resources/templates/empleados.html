@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" type="text/css" th:href="@{/estilos/layout.css}">
+    <link rel="stylesheet" type="text/css" th:href="@{/estilos/modulos.css}">
+    <title>Empleados</title>
+</head>
+<body>
+
+    <header th:replace="~{fragments/topbar :: topbar('empleados')}"></header>
+
+    <aside th:replace="~{fragments/sidebar :: sidebar('empleados')}"></aside>
+
+    <main>
+
+        <div class="page-head">
+            <div class="page-head-left">
+                <div class="page-icon">
+                    <img th:src="@{/img/logo.png}" alt="">
+                </div>
+                <div>
+                    <h1>Lista de empleados</h1>
+                    <p class="subtitle-main">Gestiona la información de tus empleados</p>
+                </div>
+            </div>
+            <div class="actions">
+                <a th:if="${estado != 'Inactivo'}" th:href="@{/empleados(estado='Inactivo')}" class="btn">Ver inactivos</a>
+                <a th:if="${estado == 'Inactivo'}" th:href="@{/empleados(estado='Activo')}" class="btn">Mostrar activos</a>
+                <a th:href="@{/empleadosFormulario}" class="btn primary">Nuevo empleado</a>
+            </div>
+        </div>
+
+        <form method="get" th:action="@{/empleados}" class="filters">
+            <div class="field">
+                <label>Buscar identificación/nombre</label>
+                <input type="text" name="buscador" th:value="${buscador}" placeholder="Buscar por identificación o nombre">
+            </div>
+            <div class="field">
+                <label>Fecha ingreso</label>
+                <input type="date" name="fechaIngreso" th:value="${fechaIngreso}">
+            </div>
+            <div class="filters-actions">
+                <button type="submit" class="btn primary">Filtrar</button>
+                <a th:href="@{/empleados}" class="btn">Limpiar</a>
+            </div>
+        </form>
+
+        <div class="table-wrap">
+            <table>
+                <thead>
+                <tr>
+                    <th>Identificación</th>
+                    <th>Nombre del empleado</th>
+                    <th>Fecha ingreso</th>
+                    <th>Estado</th>
+                    <th>Fecha retiro</th>
+                    <th>Opciones</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="empleado : ${empleados}"
+                    th:style="${empleado.estado == 'Activo' ? 'background-color:#ecfdf3;' : (empleado.estado == 'Inactivo' ? 'background-color:#fffbea;' : '')}">
+                    <td th:text="${empleado.identificacion}"></td>
+                    <td th:text="${empleado.nombreEmpleado}"></td>
+                    <td th:text="${empleado.fechaIngreso}"></td>
+                    <td th:text="${empleado.estado}"></td>
+                    <td th:text="${empleado.fechaRetiro}"></td>
+                    <td>
+                        <div class="options-cell">
+                            <a th:href="@{/documentos-empleado/{id}(id=${empleado.identificacion})}" class="btn primary">
+                                Agregar documentación
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="pagination-bar">
+            <a th:if="${paginaActual > 1}"
+               th:href="@{/empleados(pagina=${paginaActual - 1}, buscador=${buscador})}" class="btn">Anterior</a>
+
+            <span>Página <strong th:text="${paginaActual}"></strong> de <strong th:text="${totalPaginas}"></strong></span>
+
+            <a th:if="${paginaActual < totalPaginas}"
+               th:href="@{/empleados(pagina=${paginaActual + 1}, buscador=${buscador})}" class="btn">Siguiente</a>
+
+            <span>Total: <strong th:text="${totalRegistros}"></strong></span>
+        </div>
+
+    </main>
+
+</body>
+</html>

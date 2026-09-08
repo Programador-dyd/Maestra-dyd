@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" type="text/css" th:href="@{/estilos/layout.css}">
+    <link rel="stylesheet" type="text/css" th:href="@{/estilos/modulos.css}">
+    <title>Clientes archivados</title>
+</head>
+<body>
+
+    <header th:replace="~{fragments/topbar :: topbar('clientesArchivados')}"></header>
+
+    <aside th:replace="~{fragments/sidebar :: sidebar('clientesArchivados')}"></aside>
+
+    <main>
+
+        <div class="page-head">
+            <div class="page-head-left">
+                <div class="page-icon">
+                    <img th:src="@{/img/logo.png}" alt="">
+                </div>
+                <div>
+                    <h1>Lista de clientes inactivos</h1>
+                    <p class="subtitle-main">Clientes archivados del sistema</p>
+                </div>
+            </div>
+            <div class="actions">
+                <a th:href="@{/clientes}" class="btn">Ver clientes activos</a>
+                <a th:if="${!oneDriveConectado}" th:href="@{/onedrive/conectar}" class="btn">Conectar OneDrive</a>
+                <span th:if="${oneDriveConectado}" class="btn" style="cursor:default;">✔ OneDrive conectado</span>
+            </div>
+        </div>
+
+        <form method="get" th:action="@{/clientes/archivados}" class="filters">
+            <div class="field">
+                <label>Buscar nit/razón social</label>
+                <input type="text" name="buscador" th:value="${buscador}" placeholder="Buscar por NIT o Razón Social">
+            </div>
+            <div class="field">
+                <label>Fecha ingreso</label>
+                <input type="date" name="fechaPrograma" th:value="${fechaPrograma}">
+            </div>
+            <div class="field">
+                <label>Fecha ingreso Siesa</label>
+                <input type="date" name="fechaSiesa" th:value="${fechaSiesa}">
+            </div>
+            <div class="field">
+                <label>Estado documento</label>
+                <select name="estado">
+                    <option value="">Todos</option>
+                    <option value="COMPLETO" th:selected="${estado == 'COMPLETO'}">Completo</option>
+                    <option value="INCOMPLETO" th:selected="${estado == 'INCOMPLETO'}">Incompleto</option>
+                </select>
+            </div>
+            <div class="filters-actions">
+                <button type="submit" class="btn primary">Filtrar</button>
+                <a th:href="@{/clientes/archivados}" class="btn">Limpiar</a>
+            </div>
+        </form>
+
+        <div class="table-wrap">
+            <table>
+                <thead>
+                <tr>
+                    <th>Identificación</th>
+                    <th>Nombre / Razón Social</th>
+                    <th>Estado</th>
+                    <th>Estado documentación</th>
+                    <th>Fecha ingreso</th>
+                    <th>Fecha ingreso siesa</th>
+                    <th>Opciones</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="cliente : ${clientes}"
+                    th:style="${cliente.estadoDocumentacion == 'COMPLETO' ? 'background-color:#ecfdf3;' : (cliente.estadoDocumentacion == 'INCOMPLETO' ? 'background-color:#fffbea;' : '')}">
+                    <td th:text="${cliente.nitCliente}"></td>
+                    <td th:text="${cliente.razonSocial}"></td>
+                    <td th:text="${cliente.estado}"></td>
+                    <td th:text="${cliente.estadoDocumentacion}"></td>
+                    <td th:text="${cliente.fechaPrograma}"></td>
+                    <td th:text="${cliente.fechaSiesa}"></td>
+                    <td>
+                        <div class="options-cell">
+                            <form th:action="@{/clientes/{nit}/restaurar(nit=${cliente.nitCliente})}" method="post"
+                                  onsubmit="return confirm('¿Desea restaurar el cliente con NIT ' + this.dataset.nit + '?');"
+                                  th:attr="data-nit=${cliente.nitCliente}">
+                                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                                <button type="submit" title="Restaurar" class="row-icon">
+                                    <img src="/iconos/icon-restaurar.png" width="28" height="28">
+                                </button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="pagination-bar">
+            <a th:if="${paginaActual > 1}"
+               th:href="@{/clientes/archivados(pagina=${paginaActual - 1}, buscador=${buscador})}" class="btn">Anterior</a>
+
+            <span>Página <strong th:text="${paginaActual}"></strong> de <strong th:text="${totalPaginas}"></strong></span>
+
+            <a th:if="${paginaActual < totalPaginas}"
+               th:href="@{/clientes/archivados(pagina=${paginaActual + 1}, buscador=${buscador})}" class="btn">Siguiente</a>
+
+            <span>Total: <strong th:text="${totalRegistros}"></strong></span>
+        </div>
+
+    </main>
+
+</body>
+</html>

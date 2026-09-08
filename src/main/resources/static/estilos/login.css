@@ -1,0 +1,391 @@
+:root {
+  --primary: #0050a2;
+  --primary-hover: #003a77;
+  --border: #d5e3f2;
+  --border-hover: #a9c3de;
+  --focus: rgba(0, 80, 162, 0.16);
+  --text: #222222;
+
+  font-family: "Instrument Sans", "Segoe UI", sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  min-height: 100%;
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at 20% 20%, rgba(169, 195, 222, 0.38), transparent 34%),
+    radial-gradient(circle at 80% 10%, rgba(213, 227, 242, 0.7), transparent 28%),
+    linear-gradient(135deg, #ffffff 0%, #e6eef7 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  color: var(--text);
+}
+
+body.intro-active {
+  overflow: hidden;
+}
+
+/* Pantalla de introducción con el logo grande */
+.logo-intro {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  z-index: 30;
+  background:
+    radial-gradient(circle at center, rgba(0, 80, 162, 0.18), transparent 36%),
+    linear-gradient(135deg, #ffffff 0%, #e6eef7 100%);
+  transition: opacity 0.4s ease;
+}
+
+.logo-intro[aria-hidden="true"] {
+  display: none;
+}
+
+body.intro-skip .logo-intro {
+  display: none;
+}
+
+body.intro-exit .logo-intro {
+  opacity: 0;
+}
+
+.logo-intro-btn {
+  border: 0;
+  background: transparent;
+  display: grid;
+  justify-items: center;
+  gap: 12px;
+  cursor: pointer;
+  color: #475569;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  transition: transform 0.5s ease, opacity 0.4s ease, filter 0.4s ease;
+}
+
+.logo-intro-btn img {
+  width: clamp(220px, 34vw, 360px);
+  height: auto;
+  display: block;
+  filter: drop-shadow(0 20px 30px rgba(15, 23, 42, 0.16));
+}
+
+.logo-intro-btn:focus-visible {
+  outline: 4px solid rgba(0, 80, 162, 0.22);
+  outline-offset: 14px;
+  border-radius: 18px;
+}
+
+body.intro-exit .logo-intro-btn {
+  opacity: 0;
+  transform: scale(1.45);
+  filter: blur(2px);
+}
+
+/* Tarjeta principal del login */
+.card {
+  background: rgba(255, 255, 255, 0.92);
+  width: 100%;
+  max-width: 500px;
+  padding: 42px 38px 32px;
+  border: 1px solid #a9c3de;
+  border-radius: 26px;
+  box-shadow: 0 30px 80px rgba(0, 80, 162, 0.18);
+  text-align: center;
+  transition: opacity 0.45s ease, transform 0.45s ease;
+  backdrop-filter: blur(10px);
+}
+
+body.intro-active .card {
+  opacity: 0;
+  transform: translateY(20px) scale(0.97);
+  pointer-events: none;
+}
+
+body.intro-exit .card {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  transition-delay: 0.1s;
+}
+
+.logo-box {
+  display: flex;
+  justify-content: center;
+  margin-top: 4px;
+  margin-bottom: 34px;
+}
+
+.logo-box img {
+  width: 190px;
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+.card h2 {
+  margin: 0;
+  color: #0f172a;
+  font-size: 34px;
+  line-height: 1.1;
+  font-weight: 700;
+  letter-spacing: -0.04em;
+}
+
+.subtitle {
+  margin: 8px 0 26px;
+  color: #69707d;
+  font-size: 15px;
+  font-weight: 400;
+}
+
+.card form {
+  width: 100%;
+}
+
+.card label {
+  display: block;
+  text-align: left;
+  margin-top: 14px;
+  margin-bottom: 7px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #334155;
+}
+
+.card input {
+  width: 100%;
+  height: 48px;
+  padding: 10px 14px;
+  margin-top: 0;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: #ffffff;
+  font-family: "Instrument Sans", "Segoe UI", sans-serif;
+  font-weight: 400;
+  color: #1e293b;
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+  max-width: 100%;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.card input::placeholder {
+  color: #94a3b8;
+}
+
+.card input:hover {
+  border-color: var(--border-hover);
+}
+
+.card input:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 4px var(--focus);
+}
+
+/* Campo de contraseña con botón de mostrar/ocultar */
+.input-row {
+  position: relative;
+  width: 100%;
+}
+
+.input-row input {
+  padding-right: 52px;
+}
+
+.toggle-pass {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  border: 0;
+  border-radius: 9px;
+  background: transparent;
+  color: #64748b;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 2;
+  transition: background-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.toggle-pass:hover {
+  background: #e6eef7;
+  color: #003a77;
+}
+
+.toggle-pass:focus-visible {
+  outline: 3px solid rgba(0, 80, 162, 0.18);
+  outline-offset: 2px;
+}
+
+.toggle-pass:active {
+  transform: translateY(-50%) scale(0.96);
+}
+
+.icon-eye {
+  width: 19px;
+  height: 19px;
+  display: block;
+  pointer-events: none;
+}
+
+.icon-show {
+  display: none;
+}
+
+.icon-hide {
+  display: block;
+}
+
+.toggle-pass.is-visible .icon-show {
+  display: block;
+}
+
+.toggle-pass.is-visible .icon-hide {
+  display: none;
+}
+
+/* Botón de enviar */
+.card .login-submit {
+  width: 100%;
+  height: 48px;
+  margin-top: 22px;
+  padding: 0 14px;
+  border: 0;
+  border-radius: 13px;
+  background: linear-gradient(135deg, #0050a2 0%, #003a77 100%);
+  color: #ffffff;
+  font-family: "Instrument Sans", "Segoe UI", sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 14px 28px rgba(0, 80, 162, 0.24);
+  transition: background-color 0.25s ease, transform 0.25s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.25s cubic-bezier(0.22, 1, 0.36, 1), filter 0.2s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.card .login-submit:hover {
+  background: linear-gradient(135deg, #003a77 0%, #002850 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 18px 34px rgba(0, 80, 162, 0.30);
+  filter: brightness(1.03);
+}
+
+.card .login-submit:focus-visible {
+  outline: 3px solid rgba(0, 80, 162, 0.24);
+  outline-offset: 3px;
+}
+
+.card .login-submit:active {
+  transform: translateY(0) scale(0.98);
+  box-shadow: 0 4px 10px rgba(0, 80, 162, 0.22);
+}
+
+/* Mensajes de error / información / éxito */
+.msg {
+  margin-top: 14px;
+  border-radius: 13px;
+  padding: 10px 12px;
+  font-size: 13px;
+  line-height: 1.4;
+  font-weight: 600;
+  border: 1px solid transparent;
+}
+
+.msg-error {
+  background: #fef2f2;
+  border-color: #fca5a5;
+  color: #b91c1c;
+}
+
+.msg-info {
+  background: #e6eef7;
+  border-color: #a9c3de;
+  color: #003a77;
+}
+
+.msg-ok {
+  background: #ecfdf3;
+  border-color: #86efac;
+  color: #166534;
+}
+
+/* Responsive */
+@media (max-width: 520px) {
+  body {
+    padding: 14px;
+    align-items: flex-start;
+  }
+
+  .card {
+    max-width: 100%;
+    margin-top: 24px;
+    padding: 30px 20px 22px;
+    border-radius: 22px;
+  }
+
+  .logo-box {
+    margin-bottom: 28px;
+  }
+
+  .logo-box img {
+    width: 150px;
+  }
+
+  .card h2 {
+    font-size: 28px;
+  }
+
+  .subtitle {
+    font-size: 14px;
+    margin-bottom: 22px;
+  }
+
+  .card input,
+  .card .login-submit {
+    height: 46px;
+  }
+
+  .toggle-pass {
+    right: 9px;
+    width: 32px;
+    height: 32px;
+  }
+
+  .icon-eye {
+    width: 18px;
+    height: 18px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.001ms !important;
+  }
+}

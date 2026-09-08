@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" type="text/css" th:href="@{/estilos/layout.css}">
+    <link rel="stylesheet" type="text/css" th:href="@{/estilos/modulos.css}">
+    <title>Tipos de documento</title>
+</head>
+<body>
+
+    <header th:replace="~{fragments/topbar :: topbar('tiposDocumento')}"></header>
+
+    <aside th:replace="~{fragments/sidebar :: sidebar('tiposDocumento')}"></aside>
+
+    <main>
+
+        <div class="page-head">
+            <div class="page-head-left">
+                <div class="page-icon">
+                    <img th:src="@{/img/logo.png}" alt="">
+                </div>
+                <div>
+                    <h1>Tipos de documento</h1>
+                    <p class="subtitle-main">Gestiona los tipos de documento del sistema</p>
+                </div>
+            </div>
+            <div class="actions">
+                <a th:href="@{/tipoDocumentoFormulario}" class="btn primary">Agregar</a>
+            </div>
+        </div>
+
+        <div class="table-wrap table-tinted">
+            <table>
+                <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Tipo de documentación</th>
+                    <th>Opciones</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="td : ${tiposDocumento}">
+                    <td th:text="${td.id}"></td>
+                    <td th:text="${td.tipo}"></td>
+                    <td>
+                        <div class="options-cell">
+                            <a th:href="@{/tipoDocumentoFormulario(id=${td.id})}" title="Modificar" class="row-icon">
+                                <img src="/iconos/icon-editar.png" width="28" height="28">
+                            </a>
+
+                            <form th:action="@{/tipos-documento/{id}/eliminar(id=${td.id})}" method="post"
+                                  onsubmit="return confirm('¿Eliminar este documento?');">
+                                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                                <button type="submit" title="Eliminar" class="row-icon">
+                                    <img src="/iconos/icon-eliminar-documento.png" width="28" height="28">
+                                </button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+    </main>
+
+</body>
+</html>

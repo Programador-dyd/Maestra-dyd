@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" type="text/css" th:href="@{/estilos/layout.css}">
+    <title>Inicio</title>
+</head>
+<body>
+
+    <header th:replace="~{fragments/topbar :: topbar('inicio')}"></header>
+
+    <aside th:replace="~{fragments/sidebar :: sidebar('inicio')}"></aside>
+
+    <main>
+        <div id="banner">
+            <h3 style="text-align: center; font-family: Arial, sans-serif; margin-bottom: 20px;">SOBRE NOSOTROS</h3>
+            <div class="cards-container">
+
+            </div>
+        </div>
+    </main>
+
+</body>
+</html>

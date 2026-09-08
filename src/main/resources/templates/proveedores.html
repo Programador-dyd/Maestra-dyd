@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" type="text/css" th:href="@{/estilos/layout.css}">
+    <link rel="stylesheet" type="text/css" th:href="@{/estilos/modulos.css}">
+    <title>Proveedores</title>
+</head>
+<body>
+
+    <header th:replace="~{fragments/topbar :: topbar('proveedores')}"></header>
+
+    <aside th:replace="~{fragments/sidebar :: sidebar('proveedores')}"></aside>
+
+    <main>
+
+        <div class="page-head">
+            <div class="page-head-left">
+                <div class="page-icon">
+                    <img th:src="@{/img/logo.png}" alt="">
+                </div>
+                <div>
+                    <h1>Lista de proveedores</h1>
+                    <p class="subtitle-main">Gestiona la información de tus proveedores</p>
+                </div>
+            </div>
+            <div class="actions">
+                <a th:if="${estado != 'Inactivo'}" th:href="@{/proveedores(estado='Inactivo')}" class="btn">Ver inactivos</a>
+                <a th:if="${estado == 'Inactivo'}" th:href="@{/proveedores(estado='Activo')}" class="btn">Mostrar activos</a>
+                <a th:href="@{/proveedoresFormulario}" class="btn primary">Nuevo proveedor</a>
+            </div>
+        </div>
+
+        <form method="get" th:action="@{/proveedores}" class="filters">
+            <div class="field">
+                <label>Buscar nit/razón social</label>
+                <input type="text" name="buscador" th:value="${buscador}" placeholder="Buscar por NIT o Razón Social">
+            </div>
+            <div class="field">
+                <label>Fecha ingreso</label>
+                <input type="date" name="fechaPrograma" th:value="${fechaPrograma}">
+            </div>
+            <div class="field">
+                <label>Fecha ingreso Siesa</label>
+                <input type="date" name="fechaSiesa" th:value="${fechaSiesa}">
+            </div>
+            <div class="field">
+                <label>Estado documento</label>
+                <select name="estadoDocumentacion">
+                    <option value="">Todos</option>
+                    <option value="COMPLETO" th:selected="${estadoDocumentacion == 'COMPLETO'}">Completo</option>
+                    <option value="INCOMPLETO" th:selected="${estadoDocumentacion == 'INCOMPLETO'}">Incompleto</option>
+                </select>
+            </div>
+            <div class="filters-actions">
+                <button type="submit" class="btn primary">Filtrar</button>
+                <a th:href="@{/proveedores}" class="btn">Limpiar</a>
+            </div>
+        </form>
+
+        <div class="table-wrap">
+            <table>
+                <thead>
+                <tr>
+                    <th>Identificación</th>
+                    <th>Nombre / Razón Social</th>
+                    <th>Estado</th>
+                    <th>Estado documentación</th>
+                    <th>Fecha ingreso</th>
+                    <th>Fecha ingreso siesa</th>
+                    <th>Opciones</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="proveedor : ${proveedores}"
+                    th:style="${proveedor.estado == 'Activo' ? 'background-color:#ecfdf3;' : (proveedor.estado == 'Inactivo' ? 'background-color:#fffbea;' : '')}">
+                    <td th:text="${proveedor.nitProveedor}"></td>
+                    <td th:text="${proveedor.razonSocial}"></td>
+                    <td th:text="${proveedor.estado}"></td>
+                    <td th:text="${proveedor.estadoDocumentacion}"></td>
+                    <td th:text="${proveedor.fechaPrograma}"></td>
+                    <td th:text="${proveedor.fechaSiesa}"></td>
+                    <td>
+                        <div class="options-cell">
+                            <a th:href="@{/proveedoresFormulario(nitProveedor=${proveedor.nitProveedor})}" title="Modificar" class="row-icon">
+                                <img src="/iconos/icon-editar.png" width="28" height="28">
+                            </a>
+
+                            <a th:href="@{/documentos-proveedor/{nit}(nit=${proveedor.nitProveedor})}" title="Ver Documentos" class="row-icon">
+                                <img src="/iconos/icon-ver.png" width="28" height="28">
+                            </a>
+
+                            <form th:if="${proveedor.estado == 'Activo'}"
+                                  th:action="@{/proveedores/{nit}/archivar(nit=${proveedor.nitProveedor})}" method="post"
+                                  onsubmit="return confirm('¿Desea archivar este proveedor?');">
+                                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                                <button type="submit" title="Archivar" class="row-icon">
+                                    <img src="/iconos/icon-archivar.png" width="28" height="28">
+                                </button>
+                            </form>
+
+                            <form th:if="${proveedor.estado == 'Inactivo'}"
+                                  th:action="@{/proveedores/{nit}/restaurar(nit=${proveedor.nitProveedor})}" method="post"
+                                  onsubmit="return confirm('¿Desea restaurar este proveedor?');">
+                                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                                <button type="submit" title="Restaurar" class="row-icon">
+                                    <img src="/iconos/icon-restaurar.png" width="28" height="28">
+                                </button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="pagination-bar">
+            <a th:if="${paginaActual > 1}"
+               th:href="@{/proveedores(pagina=${paginaActual - 1}, buscador=${buscador})}" class="btn">Anterior</a>
+
+            <span>Página <strong th:text="${paginaActual}"></strong> de <strong th:text="${totalPaginas}"></strong></span>
+
+            <a th:if="${paginaActual < totalPaginas}"
+               th:href="@{/proveedores(pagina=${paginaActual + 1}, buscador=${buscador})}" class="btn">Siguiente</a>
+
+            <span>Total: <strong th:text="${totalRegistros}"></strong></span>
+        </div>
+
+    </main>
+
+</body>
+</html>
