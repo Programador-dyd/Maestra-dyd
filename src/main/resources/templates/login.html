@@ -73,9 +73,12 @@
             <button type="submit" class="login-submit">Ingresar</button>
         </form>
 
-        <div class="msg msg-error" th:if="${param.error}">
-            Usuario o clave incorrectos
-        </div>
+        <p th:if="${param.error != null and param.error[0] != 'sin_permiso'}" style="color:red; text-align:center;">
+            Usuario o contraseña incorrectos.
+        </p>
+        <p th:if="${param.error != null and param.error[0] == 'sin_permiso'}" style="color:red; text-align:center;">
+            No tienes permiso para acceder a esa página.
+        </p>
 
         <div class="msg msg-info" th:if="${param.logout}">
             Sesión cerrada correctamente

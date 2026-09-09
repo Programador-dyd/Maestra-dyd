@@ -21,11 +21,11 @@ public class DocumentosEmpleado {
     @Column(name = "`ruta_Documento`", length = 300)
     private String rutaDocumento;
 
-    @Column(name = "onedrive_id", length = 150)
-    private String onedriveId;
+    @Column(name = "s3_key", length = 500)
+    private String s3Key;
 
-    @Column(name = "onedrive_url", length = 500)
-    private String onedriveUrl;
+    @Column(name = "s3_url", length = 500)
+    private String s3Url;
 
     @Column(name = "fecha_subida", insertable = false, updatable = false)
     private LocalDateTime fechaSubida;
@@ -49,11 +49,11 @@ public class DocumentosEmpleado {
     public String getRutaDocumento() { return rutaDocumento; }
     public void setRutaDocumento(String rutaDocumento) { this.rutaDocumento = rutaDocumento; }
 
-    public String getOnedriveId() { return onedriveId; }
-    public void setOnedriveId(String onedriveId) { this.onedriveId = onedriveId; }
+    public String getS3Key() { return s3Key; }
+    public void setS3Key(String s3Key) { this.s3Key = s3Key; }
 
-    public String getOnedriveUrl() { return onedriveUrl; }
-    public void setOnedriveUrl(String onedriveUrl) { this.onedriveUrl = onedriveUrl; }
+    public String getS3Url() { return s3Url; }
+    public void setS3Url(String s3Url) { this.s3Url = s3Url; }
 
     public LocalDateTime getFechaSubida() { return fechaSubida; }
     public void setFechaSubida(LocalDateTime fechaSubida) { this.fechaSubida = fechaSubida; }

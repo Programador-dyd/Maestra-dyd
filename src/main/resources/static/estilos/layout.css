@@ -198,7 +198,7 @@ body.sidebar-open .sidebar {
 }
 
 body.sidebar-open .sidebar .logo img {
-  height: 100px;
+  height: 150px;
 }
 
 .sidebar-nav {
@@ -251,16 +251,10 @@ body.sidebar-open .sidebar-nav a span {
 .icon-usuarios { background-image: url('/icons/usuarios.png'); }
 .icon-acreedores { background-image: url('/icons/Acreedores.png'); }
 .icon-tipos-doc { background-image: url('/icons/documentos.png'); }
-.icon-cliente-activo { background-image: url('/icons/cliente_activo.png'); }
-.icon-cliente-inactivo { background-image: url('/icons/cliente_desactivado.png'); }
-.icon-acreedor-activo { background-image: url('/icons/acreedor_activo.png'); }
-.icon-acreedor-inactivo { background-image: url('/icons/acreedor_desactivo.png'); }
 .icon-proveedores { background-image: url('/icons/proveedores.png'); }
-.icon-proveedor-activo { background-image: url('/icons/proveedor_activo.png'); }
-.icon-proveedor-inactivo { background-image: url('/icons/proveedor_desactivo.png'); }
 .icon-empleados { background-image: url('/icons/empleados.png'); }
-.icon-empleado-activo { background-image: url('/icons/empleado_activo.png'); }
-.icon-empleado-inactivo { background-image: url('/icons/empleado_desactivo.png'); }
+.icon-activo { background-image: url('/icons/icon_activo.png'); }
+.icon-inactivo { background-image: url('/icons/icon_inactivo.png'); }
 
 .sidebar-overlay {
   display: none;

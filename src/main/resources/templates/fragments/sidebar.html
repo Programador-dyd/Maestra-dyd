@@ -12,18 +12,18 @@
         </a>
 
         <details class="nav-group" th:attr="open=${active == 'clientes' or active == 'clientesArchivados'}">
-          <summary class="nav-group-toggle"
+          <summary class="nav-group-toggle" title="Clientes"
                   th:classappend="${active == 'clientes' or active == 'clientesArchivados'} ? 'active' : ''">
             <i class="icon-clientes"></i>
             <span>Clientes</span>
             <span class="nav-group-caret" aria-hidden="true">▾</span>
           </summary>
           <nav class="nav-submenu">
-              <a th:href="@{/clientes}" th:classappend="${active}=='clientes' ? 'active' : ''">
-                <i class="icon-cliente-activo"></i> <span>Clientes activos</span>
+              <a th:href="@{/clientes}" th:classappend="${active}=='clientes' ? 'active' : ''" title="Clientes activos">
+                <i class="icon-activo"></i> <span>Clientes activos</span>
               </a>
-              <a th:href="@{/clientes/archivados}" th:classappend="${active}=='clientesArchivados' ? 'active' : ''">
-                <i class="icon-cliente-inactivo"></i> <span>Clientes inactivos</span>
+              <a th:href="@{/clientes/archivados}" th:classappend="${active}=='clientesArchivados' ? 'active' : ''" title="Clientes inactivos">
+                <i class="icon-inactivo"></i> <span>Clientes inactivos</span>
               </a>
           </nav>
         </details>
@@ -34,54 +34,56 @@
         </a>
 
         <details sec:authorize="hasRole('A')" class="nav-group" th:attr="open=${active == 'acreedores'}">
-          <summary class="nav-group-toggle"
+          <summary class="nav-group-toggle" title="Acreedores"
                   th:classappend="${active == 'acreedores'} ? 'active' : ''">
             <i class="icon-acreedores"></i>
             <span>Acreedores</span>
             <span class="nav-group-caret" aria-hidden="true">▾</span>
           </summary>
           <nav class="nav-submenu">
-            <a th:href="@{/acreedores(estado='Activo')}" th:classappend="${active == 'acreedores' and estado != 'Inactivo'} ? 'active' : ''">
-              <i class="icon-acreedor-activo"></i> <span>Acreedores activos</span>
+            <a th:href="@{/acreedores(estado='Activo')}" th:classappend="${active == 'acreedores' and estado != 'Inactivo'} ? 'active' : ''" title="Acreedores activos">
+              <i class="icon-activo"></i> <span>Acreedores activos</span>
             </a>
-            <a th:href="@{/acreedores(estado='Inactivo')}" th:classappend="${active == 'acreedores' and estado == 'Inactivo'} ? 'active' : ''">
-              <i class="icon-acreedor-inactivo"></i> <span>Acreedores inactivos</span>
+            <a th:href="@{/acreedores(estado='Inactivo')}" th:classappend="${active == 'acreedores' and estado == 'Inactivo'} ? 'active' : ''" title="Acreedores inactivos">
+              <i class="icon-inactivo"></i> <span>Acreedores inactivos</span>
             </a>
           </nav>
         </details>
 
         <details sec:authorize="hasRole('A')" class="nav-group" th:attr="open=${active == 'proveedores'}">
-          <summary class="nav-group-toggle"
+          <summary class="nav-group-toggle" title="Proveedores"
                   th:classappend="${active == 'proveedores'} ? 'active' : ''">
             <i class="icon-proveedores"></i>
             <span>Proveedores</span>
             <span class="nav-group-caret" aria-hidden="true">▾</span>
           </summary>
           <nav class="nav-submenu">
-            <a th:href="@{/proveedores(estado='Activo')}" th:classappend="${active == 'proveedores' and estado != 'Inactivo'} ? 'active' : ''">
-              <i class="icon-proveedor-activo"></i> <span>Proveedores activos</span>
+            <a th:href="@{/proveedores(estado='Activo')}" th:classappend="${active == 'proveedores' and estado != 'Inactivo'} ? 'active' : ''" title="Proveedores activos">
+              <i class="icon-activo"></i> <span>Proveedores activos</span>
             </a>
-            <a th:href="@{/proveedores(estado='Inactivo')}" th:classappend="${active == 'proveedores' and estado == 'Inactivo'} ? 'active' : ''">
-              <i class="icon-proveedor-inactivo"></i> <span>Proveedores inactivos</span>
+            <a th:href="@{/proveedores(estado='Inactivo')}" th:classappend="${active == 'proveedores' and estado == 'Inactivo'} ? 'active' : ''" title="Proveedores inactivos">
+              <i class="icon-inactivo"></i> <span>Proveedores inactivos</span>
             </a>
           </nav>
         </details>
+
         <details sec:authorize="hasRole('A')" class="nav-group" th:attr="open=${active == 'empleados'}">
-          <summary class="nav-group-toggle"
+          <summary class="nav-group-toggle" title="Empleados"
                   th:classappend="${active == 'empleados'} ? 'active' : ''">
             <i class="icon-empleados"></i>
             <span>Empleados</span>
             <span class="nav-group-caret" aria-hidden="true">▾</span>
           </summary>
           <nav class="nav-submenu">
-            <a th:href="@{/empleados(estado='Activo')}" th:classappend="${active == 'empleados' and estado != 'Inactivo'} ? 'active' : ''">
-              <i class="icon-empleado-activo"></i> <span>Empleados activos</span>
+            <a th:href="@{/empleados(estado='Activo')}" th:classappend="${active == 'empleados' and estado != 'Inactivo'} ? 'active' : ''" title="Empleados activos">
+              <i class="icon-activo"></i> <span>Empleados activos</span>
             </a>
-            <a th:href="@{/empleados(estado='Inactivo')}" th:classappend="${active == 'empleados' and estado == 'Inactivo'} ? 'active' : ''">
-              <i class="icon-empleado-inactivo"></i> <span>Empleados inactivos</span>
+            <a th:href="@{/empleados(estado='Inactivo')}" th:classappend="${active == 'empleados' and estado == 'Inactivo'} ? 'active' : ''" title="Empleados inactivos">
+              <i class="icon-inactivo"></i> <span>Empleados inactivos</span>
             </a>
           </nav>
         </details>
+
         <a sec:authorize="hasRole('A')"
           th:href="@{/tipos-documento}" th:classappend="${active}=='tiposDocumento' ? 'active' : ''" title="Tipos documentos">
           <i class="icon-tipos-doc"></i> <span>Tipos documentos</span>

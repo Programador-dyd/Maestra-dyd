@@ -32,6 +32,18 @@
             </div>
         </div>
 
+        <div th:if="${param.ok}" class="msg msg-ok" style="max-width:500px;">Archivo subido correctamente.</div>
+        <div th:if="${param.error != null and param.error[0] == 'sin_s3'}" class="msg msg-error" style="max-width:500px;">
+            El almacenamiento en AWS S3 no está configurado todavía. Contacta al administrador.
+        </div>
+        <div th:if="${param.error != null and param.error[0] == 'sin_archivo'}" class="msg msg-error" style="max-width:500px;">Selecciona un archivo.</div>
+        <div th:if="${param.error != null and param.error[0] == 'subida'}" class="msg msg-error" style="max-width:500px;">Ocurrió un error al subir el archivo.</div>
+        <div th:if="${param.error != null and param.error[0] == 'solo_pdf'}" class="msg msg-error" style="max-width:500px;">Solo se permiten archivos PDF.</div>
+
+        <div th:if="${!s3Disponible}" class="msg msg-info" style="max-width:500px;">
+            ⚠ El almacenamiento en AWS S3 aún no está configurado. La subida de documentos no estará disponible hasta que el administrador complete la configuración.
+        </div>
+
         <div class="form-card">
             <h2 style="margin:0 0 16px; font-size:16px; color:#172033;">Subir nuevo documento</h2>
             <form th:action="@{/documentos-empleado/{id}/subir(id=${empleado.identificacion})}" method="post" enctype="multipart/form-data">
@@ -40,7 +52,7 @@
                 <div class="form-grid">
                     <div class="form-field">
                         <label>Categoría</label>
-                        <select id="categoriaSelect">
+                        <select id="selectCategoriaDocEmpleado">
                             <option value="">Selecciona una categoría</option>
                             <option th:each="entrada : ${tiposPorCategoria}" th:value="${entrada.key}" th:text="${entrada.key}"></option>
                         </select>
@@ -54,22 +66,55 @@
                     </div>
 
                     <div class="form-field">
-                        <label>Archivo</label>
-                        <input type="file" name="archivo" required>
+                        <label>Archivo (solo PDF)</label>
+                        <input type="file" name="archivo" accept="application/pdf,.pdf" required>
                     </div>
 
                     <div class="form-field form-field-submit">
                         <label class="form-label-spacer"></label>
                         <div class="form-submit-wrap">
-                            <input type="submit" value="Subir a OneDrive">
+                            <input type="submit" value="Subir a S3" th:disabled="${!s3Disponible}">
                         </div>
                     </div>
                 </div>
             </form>
         </div>
 
+        <div class="table-wrap">
+            <table>
+                <thead>
+                <tr>
+                    <th>Tipo documento</th>
+                    <th>Nombre archivo</th>
+                    <th>Fecha subida</th>
+                    <th>Acciones</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="doc : ${documentos}">
+                    <td th:text="${doc.tipo != null ? doc.tipo.nombre : ''}"></td>
+                    <td th:text="${doc.nombreArchivo}"></td>
+                    <td th:text="${doc.fechaSubida}"></td>
+                    <td>
+                        <div class="options-cell">
+                            <a th:href="@{/documentos-empleado/ver/{id}(id=${doc.id})}" target="_blank" class="btn">Ver</a>
+
+                            <form th:action="@{/documentos-empleado/{id}/eliminar(id=${doc.id})}" method="post"
+                                  onsubmit="return confirm('¿Eliminar este documento?');">
+                                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                                <input type="hidden" name="identificacion" th:value="${empleado.identificacion}">
+                                <input type="hidden" name="s3Key" th:value="${doc.s3Key}">
+                                <button type="submit" class="btn danger">Eliminar</button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
         <script th:inline="javascript">
-            const tiposPorCategoria = /*[[${tiposPorCategoriaJson}]]*/ {};
+            const tiposPorCategoria = JSON.parse(/*[[${tiposPorCategoriaJson}]]*/ '{}');
         </script>
         <script th:src="@{/js/documentos-empleado.js}"></script>
 

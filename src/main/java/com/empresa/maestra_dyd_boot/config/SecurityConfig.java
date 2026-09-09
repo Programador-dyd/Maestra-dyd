@@ -18,9 +18,15 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/login", "/css/**", "/js/**", "/img/**", "/logo/**", "/estilos/**", "/iconos/**").permitAll()
-                .requestMatchers("/usuarios", "/usuarios/**", "/usuarioFormulario", "/tipos-documento/**", "/acreedores/**", "/acreedoresFormulario", "/documentos-acreedor/**", "/proveedores/**", "/proveedoresFormulario", "/documentos-proveedor/**", "/empleados/**", "/empleadosFormulario", "/documentos-empleado/**").hasRole("A")
-                .anyRequest().authenticated()
+                .requestMatchers("/login", "/css/**", "/js/**", "/img/**", "/logo/**", "/estilos/**", "/iconos/**", "/icons/**").permitAll()
+                .requestMatchers("/documentos-empleado/**").hasAnyRole("A", "E")
+                .requestMatchers("/usuarios", "/usuarios/**", "/usuarioFormulario", "/tipos-documento/**",
+                                "/acreedores/**", "/acreedoresFormulario", "/documentos-acreedor/**",
+                                "/proveedores/**", "/proveedoresFormulario", "/documentos-proveedor/**",
+                                "/empleados/**", "/empleadosFormulario").hasRole("A")
+                .requestMatchers("/inicio", "/clientes/**", "/clientesFormulario", "/documentos/**",
+                                "/onedrive/**", "/oauth/**").hasAnyRole("A", "U")
+                .anyRequest().hasRole("A")
             )
             .formLogin(form -> form
                 .loginPage("/login")
@@ -35,6 +41,9 @@ public class SecurityConfig {
                 .logoutUrl("/logout")
                 .logoutSuccessUrl("/login?logout=1")
                 .permitAll()
+            )
+            .exceptionHandling(exceptions -> exceptions
+                .accessDeniedPage("/login?error=sin_permiso")
             );
 
         return http.build();

@@ -41,6 +41,14 @@
                 <label>Fecha ingreso</label>
                 <input type="date" name="fechaIngreso" th:value="${fechaIngreso}">
             </div>
+            <div class="field">
+                <label>Estado</label>
+                <select name="estado">
+                    <option value="" th:selected="${estado == ''}">Todos</option>
+                    <option value="Activo" th:selected="${estado == 'Activo'}">Activo</option>
+                    <option value="Inactivo" th:selected="${estado == 'Inactivo'}">Inactivo</option>
+                </select>
+            </div>
             <div class="filters-actions">
                 <button type="submit" class="btn primary">Filtrar</button>
                 <a th:href="@{/empleados}" class="btn">Limpiar</a>

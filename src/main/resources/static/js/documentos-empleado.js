@@ -1,12 +1,12 @@
 document.addEventListener('DOMContentLoaded', function () {
-    var categoriaSelect = document.getElementById('categoriaSelect');
+    var categoriaSelect = document.getElementById('selectCategoriaDocEmpleado');
     var tipoSelect = document.getElementById('tipoSelect');
 
     if (!categoriaSelect || !tipoSelect) {
         return;
     }
 
-    categoriaSelect.addEventListener('change', function () {
+    categoriaSelect.addEventListener('input', function () {
         var categoria = categoriaSelect.value;
         tipoSelect.innerHTML = '';
 

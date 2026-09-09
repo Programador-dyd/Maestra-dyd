@@ -3,8 +3,8 @@ package com.empresa.maestra_dyd_boot.service;
 import com.empresa.maestra_dyd_boot.model.Empleados;
 import com.empresa.maestra_dyd_boot.model.TipoDocumentoEmpleado;
 import com.empresa.maestra_dyd_boot.model.DocumentosEmpleado;
-import com.empresa.maestra_dyd_boot.onedrive.OneDriveClient;
 import com.empresa.maestra_dyd_boot.repository.DocumentosEmpleadoRepository;
+import com.empresa.maestra_dyd_boot.s3.S3ClientService;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -15,22 +15,31 @@ import java.text.Normalizer;
 public class DocumentosEmpleadoService {
 
     private final DocumentosEmpleadoRepository documentosEmpleadoRepository;
-    private final OneDriveClient oneDriveClient;
+    private final S3ClientService s3ClientService;
     private final EmpleadosService empleadosService;
 
     public DocumentosEmpleadoService(DocumentosEmpleadoRepository documentosEmpleadoRepository,
-                                      OneDriveClient oneDriveClient,
+                                      S3ClientService s3ClientService,
                                       EmpleadosService empleadosService) {
         this.documentosEmpleadoRepository = documentosEmpleadoRepository;
-        this.oneDriveClient = oneDriveClient;
+        this.s3ClientService = s3ClientService;
         this.empleadosService = empleadosService;
+    }
+
+    public boolean s3Disponible() {
+        return s3ClientService.credencialesConfiguradas();
     }
 
     public List<DocumentosEmpleado> listarPorEmpleado(String identificacionEmpleado) {
         return documentosEmpleadoRepository.findByIdentificacionEmpleadoOrderByFechaSubidaDesc(identificacionEmpleado);
     }
 
-    public DocumentosEmpleado subirDocumento(String accessToken, String identificacionEmpleado, TipoDocumentoEmpleado tipo,
+    public DocumentosEmpleado buscarPorId(Integer id) {
+        return documentosEmpleadoRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Documento no encontrado: " + id));
+    }
+
+    public DocumentosEmpleado subirDocumento(String identificacionEmpleado, TipoDocumentoEmpleado tipo,
                                               String nombreOriginal, byte[] contenido) {
 
         Empleados empleado = empleadosService.buscarPorIdentificacion(identificacionEmpleado);
@@ -53,27 +62,28 @@ public class DocumentosEmpleadoService {
         }
         nombreFinal = candidato;
 
-        OneDriveClient.ResultadoSubida resultado = oneDriveClient.subirArchivo(accessToken, nombreFinal, contenido);
+        String key = "empleados/" + identificacionEmpleado + "/" + nombreFinal;
+
+        S3ClientService.ResultadoSubidaS3 resultado = s3ClientService.subirArchivo(key, contenido);
 
         DocumentosEmpleado doc = new DocumentosEmpleado();
         doc.setIdentificacionEmpleado(identificacionEmpleado);
         doc.setNombreArchivo(nombreFinal);
-        doc.setRutaDocumento("OneDrive");
-        doc.setOnedriveId(resultado.onedriveId());
-        doc.setOnedriveUrl(resultado.onedriveUrl());
+        doc.setRutaDocumento("S3");
+        doc.setS3Key(resultado.key());
+        doc.setS3Url(resultado.url());
         doc.setTipo(tipo);
 
         return documentosEmpleadoRepository.save(doc);
     }
 
-    public byte[] descargarDocumento(String accessToken, String onedriveId) {
-        return oneDriveClient.descargarArchivo(accessToken, onedriveId);
+    public byte[] descargarDocumento(String s3Key) {
+        return s3ClientService.descargarArchivo(s3Key);
     }
 
-    public void eliminarDocumento(String accessToken, Integer id, String onedriveId) {
-        if (onedriveId != null && !onedriveId.isBlank()) {
-            String driveId = oneDriveClient.obtenerDriveId(accessToken);
-            oneDriveClient.eliminarArchivo(accessToken, driveId, onedriveId);
+    public void eliminarDocumento(Integer id, String s3Key) {
+        if (s3Key != null && !s3Key.isBlank()) {
+            s3ClientService.eliminarArchivo(s3Key);
         }
         documentosEmpleadoRepository.deleteById(id);
     }

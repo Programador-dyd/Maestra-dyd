@@ -2,22 +2,20 @@ package com.empresa.maestra_dyd_boot.controller;
 
 import com.empresa.maestra_dyd_boot.model.Empleados;
 import com.empresa.maestra_dyd_boot.model.TipoDocumentoEmpleado;
-import com.empresa.maestra_dyd_boot.onedrive.OneDriveTokenService;
 import com.empresa.maestra_dyd_boot.repository.TipoDocumentoEmpleadoRepository;
 import com.empresa.maestra_dyd_boot.service.EmpleadosService;
 import com.empresa.maestra_dyd_boot.service.DocumentosEmpleadoService;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-
 import java.io.IOException;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Controller
@@ -26,20 +24,20 @@ public class DocumentosEmpleadoController {
     private final DocumentosEmpleadoService documentosEmpleadoService;
     private final EmpleadosService empleadosService;
     private final TipoDocumentoEmpleadoRepository tipoDocumentoEmpleadoRepository;
-    private final OneDriveTokenService oneDriveTokenService;
 
     public DocumentosEmpleadoController(DocumentosEmpleadoService documentosEmpleadoService,
                                          EmpleadosService empleadosService,
-                                         TipoDocumentoEmpleadoRepository tipoDocumentoEmpleadoRepository,
-                                         OneDriveTokenService oneDriveTokenService) {
+                                         TipoDocumentoEmpleadoRepository tipoDocumentoEmpleadoRepository) {
         this.documentosEmpleadoService = documentosEmpleadoService;
         this.empleadosService = empleadosService;
         this.tipoDocumentoEmpleadoRepository = tipoDocumentoEmpleadoRepository;
-        this.oneDriveTokenService = oneDriveTokenService;
     }
 
     @GetMapping("/documentos-empleado/{identificacion}")
-    public String verDocumentos(@PathVariable String identificacion, Model model) {
+    public String verDocumentos(@PathVariable String identificacion, Model model,
+                                 Authentication authentication) {
+        verificarAcceso(identificacion, authentication);
+
         Empleados empleado = empleadosService.buscarPorIdentificacion(identificacion);
 
         List<TipoDocumentoEmpleado> tiposDocumento = tipoDocumentoEmpleadoRepository.findAll();
@@ -51,6 +49,7 @@ public class DocumentosEmpleadoController {
         model.addAttribute("documentos", documentosEmpleadoService.listarPorEmpleado(identificacion));
         model.addAttribute("tiposPorCategoria", tiposPorCategoria);
         model.addAttribute("tiposPorCategoriaJson", convertirAJson(tiposPorCategoria));
+        model.addAttribute("s3Disponible", documentosEmpleadoService.s3Disponible());
 
         return "documentosEmpleado";
     }
@@ -58,40 +57,48 @@ public class DocumentosEmpleadoController {
     @PostMapping("/documentos-empleado/{identificacion}/subir")
     public String subir(@PathVariable String identificacion,
                          @RequestParam Integer tipo,
-                         @RequestParam MultipartFile archivo) {
+                         @RequestParam MultipartFile archivo,
+                         Authentication authentication) {
+        verificarAcceso(identificacion, authentication);
 
-        Optional<String> token = oneDriveTokenService.obtenerAccessTokenValido();
-        if (token.isEmpty()) {
-            return "redirect:/documentos-empleado/" + identificacion + "?error=sin_token";
+        if (!documentosEmpleadoService.s3Disponible()) {
+            return "redirect:/documentos-empleado/" + identificacion + "?error=sin_s3";
         }
 
         if (archivo.isEmpty()) {
             return "redirect:/documentos-empleado/" + identificacion + "?error=sin_archivo";
         }
 
+        String contentType = archivo.getContentType();
+        String nombreOriginal = archivo.getOriginalFilename();
+        boolean esPdf = "application/pdf".equals(contentType)
+                && nombreOriginal != null && nombreOriginal.toLowerCase().endsWith(".pdf");
+
+        if (!esPdf) {
+            return "redirect:/documentos-empleado/" + identificacion + "?error=solo_pdf";
+        }
+
         TipoDocumentoEmpleado tipoDocumento = tipoDocumentoEmpleadoRepository.findById(tipo)
                 .orElseThrow(() -> new IllegalArgumentException("Tipo de documento no válido"));
 
         try {
-            documentosEmpleadoService.subirDocumento(token.get(), identificacion, tipoDocumento,
-                    archivo.getOriginalFilename(), archivo.getBytes());
+            documentosEmpleadoService.subirDocumento(identificacion, tipoDocumento,
+                    nombreOriginal, archivo.getBytes());
             return "redirect:/documentos-empleado/" + identificacion + "?ok=1";
         } catch (IOException | RuntimeException e) {
             return "redirect:/documentos-empleado/" + identificacion + "?error=subida";
         }
     }
 
-    @GetMapping("/documentos-empleado/ver/{onedriveId}")
-    public void ver(@PathVariable String onedriveId, HttpServletResponse response) throws IOException {
+    @GetMapping("/documentos-empleado/ver/{id}")
+    public void ver(@PathVariable Integer id, HttpServletResponse response,
+                     Authentication authentication) throws IOException {
 
-        Optional<String> token = oneDriveTokenService.obtenerAccessTokenValido();
-        if (token.isEmpty()) {
-            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Conexión con OneDrive no disponible");
-            return;
-        }
+        var doc = documentosEmpleadoService.buscarPorId(id);
+        verificarAcceso(doc.getIdentificacionEmpleado(), authentication);
 
-        byte[] contenido = documentosEmpleadoService.descargarDocumento(token.get(), onedriveId);
-        response.setContentType("application/octet-stream");
+        byte[] contenido = documentosEmpleadoService.descargarDocumento(doc.getS3Key());
+        response.setContentType("application/pdf");
         response.getOutputStream().write(contenido);
         response.getOutputStream().flush();
     }
@@ -99,15 +106,21 @@ public class DocumentosEmpleadoController {
     @PostMapping("/documentos-empleado/{id}/eliminar")
     public String eliminar(@PathVariable Integer id,
                             @RequestParam String identificacion,
-                            @RequestParam(required = false) String onedriveId) {
+                            @RequestParam(required = false) String s3Key,
+                            Authentication authentication) {
+        verificarAcceso(identificacion, authentication);
 
-        Optional<String> token = oneDriveTokenService.obtenerAccessTokenValido();
-        if (token.isEmpty()) {
-            return "redirect:/documentos-empleado/" + identificacion + "?error=sin_token";
-        }
-
-        documentosEmpleadoService.eliminarDocumento(token.get(), id, onedriveId);
+        documentosEmpleadoService.eliminarDocumento(id, s3Key);
         return "redirect:/documentos-empleado/" + identificacion;
+    }
+
+    private void verificarAcceso(String identificacion, Authentication authentication) {
+        boolean esAdmin = authentication.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_A"));
+
+        if (!esAdmin && !authentication.getName().equals(identificacion)) {
+            throw new AccessDeniedException("No tienes acceso a esta ficha");
+        }
     }
 
     private String convertirAJson(Map<String, List<TipoDocumentoEmpleado>> tiposPorCategoria) {
@@ -123,14 +136,14 @@ public class DocumentosEmpleadoController {
             json.append("\"").append(escaparJson(entrada.getKey())).append("\":[");
 
             boolean primerTipo = true;
-            for (TipoDocumentoEmpleado tipo : entrada.getValue()) {
+            for (TipoDocumentoEmpleado tipoDoc : entrada.getValue()) {
                 if (!primerTipo) {
                     json.append(",");
                 }
                 primerTipo = false;
 
-                json.append("{\"id\":").append(tipo.getId())
-                    .append(",\"nombre\":\"").append(escaparJson(tipo.getNombre())).append("\"}");
+                json.append("{\"id\":").append(tipoDoc.getId())
+                    .append(",\"nombre\":\"").append(escaparJson(tipoDoc.getNombre())).append("\"}");
             }
 
             json.append("]");

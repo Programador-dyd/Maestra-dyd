@@ -41,6 +41,13 @@ public class PersonaAuthenticationSuccessHandler extends SimpleUrlAuthentication
             }
         });
 
-        super.onAuthenticationSuccess(request, response, authentication);
-    }
+        boolean esEmpleado = authentication.getAuthorities().stream()
+        .anyMatch(a -> a.getAuthority().equals("ROLE_E"));
+
+        if (esEmpleado) {
+            response.sendRedirect(request.getContextPath() + "/documentos-empleado/" + authentication.getName());
+        } else {
+            super.onAuthenticationSuccess(request, response, authentication);
+        }
+            }
 }
