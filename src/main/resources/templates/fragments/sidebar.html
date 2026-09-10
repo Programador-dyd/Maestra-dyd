@@ -67,7 +67,7 @@
           </nav>
         </details>
 
-        <details sec:authorize="hasRole('A')" class="nav-group" th:attr="open=${active == 'empleados'}">
+        <details sec:authorize="hasRole('A')" class="nav-group" th:attr="open=${active == 'empleados' or active == 'documentosEmpleadoBusqueda'}">
           <summary class="nav-group-toggle" title="Empleados"
                   th:classappend="${active == 'empleados'} ? 'active' : ''">
             <i class="icon-empleados"></i>
@@ -80,6 +80,9 @@
             </a>
             <a th:href="@{/empleados(estado='Inactivo')}" th:classappend="${active == 'empleados' and estado == 'Inactivo'} ? 'active' : ''" title="Empleados inactivos">
               <i class="icon-inactivo"></i> <span>Empleados inactivos</span>
+            </a>
+            <a th:href="@{/documentos-empleado-busqueda}" th:classappend="${active == 'documentosEmpleadoBusqueda'} ? 'active' : ''" title="Buscar documentos">
+              <i class="icon-busqueda"></i> <span>Buscar documentos</span>
             </a>
           </nav>
         </details>

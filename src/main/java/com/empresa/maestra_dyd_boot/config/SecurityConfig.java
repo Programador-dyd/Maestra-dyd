@@ -23,7 +23,7 @@ public class SecurityConfig {
                 .requestMatchers("/usuarios", "/usuarios/**", "/usuarioFormulario", "/tipos-documento/**",
                                 "/acreedores/**", "/acreedoresFormulario", "/documentos-acreedor/**",
                                 "/proveedores/**", "/proveedoresFormulario", "/documentos-proveedor/**",
-                                "/empleados/**", "/empleadosFormulario").hasRole("A")
+                                "/empleados/**", "/empleadosFormulario", "/documentos-empleado-busqueda").hasRole("A")
                 .requestMatchers("/inicio", "/clientes/**", "/clientesFormulario", "/documentos/**",
                                 "/onedrive/**", "/oauth/**").hasAnyRole("A", "U")
                 .anyRequest().hasRole("A")

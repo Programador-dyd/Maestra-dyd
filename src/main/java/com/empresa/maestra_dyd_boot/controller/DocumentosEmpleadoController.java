@@ -1,7 +1,9 @@
 package com.empresa.maestra_dyd_boot.controller;
 
+import com.empresa.maestra_dyd_boot.model.DocumentosEmpleado;
 import com.empresa.maestra_dyd_boot.model.Empleados;
 import com.empresa.maestra_dyd_boot.model.TipoDocumentoEmpleado;
+import com.empresa.maestra_dyd_boot.repository.DocumentosEmpleadoRepository;
 import com.empresa.maestra_dyd_boot.repository.TipoDocumentoEmpleadoRepository;
 import com.empresa.maestra_dyd_boot.service.EmpleadosService;
 import com.empresa.maestra_dyd_boot.service.DocumentosEmpleadoService;
@@ -16,6 +18,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Controller
@@ -24,13 +27,16 @@ public class DocumentosEmpleadoController {
     private final DocumentosEmpleadoService documentosEmpleadoService;
     private final EmpleadosService empleadosService;
     private final TipoDocumentoEmpleadoRepository tipoDocumentoEmpleadoRepository;
+    private final DocumentosEmpleadoRepository documentosEmpleadoRepository;
 
     public DocumentosEmpleadoController(DocumentosEmpleadoService documentosEmpleadoService,
                                          EmpleadosService empleadosService,
-                                         TipoDocumentoEmpleadoRepository tipoDocumentoEmpleadoRepository) {
+                                         TipoDocumentoEmpleadoRepository tipoDocumentoEmpleadoRepository,
+                                         DocumentosEmpleadoRepository documentosEmpleadoRepository) {
         this.documentosEmpleadoService = documentosEmpleadoService;
         this.empleadosService = empleadosService;
         this.tipoDocumentoEmpleadoRepository = tipoDocumentoEmpleadoRepository;
+        this.documentosEmpleadoRepository = documentosEmpleadoRepository;
     }
 
     @GetMapping("/documentos-empleado/{identificacion}")
@@ -45,10 +51,13 @@ public class DocumentosEmpleadoController {
         var tiposPorCategoria = tiposDocumento.stream()
                 .collect(Collectors.groupingBy(t -> t.getCategoria().getNombre()));
 
+        Map<Integer, DocumentosEmpleado> documentosPorTipoId = documentosEmpleadoService.documentosPorTipoId(identificacion);
+
         model.addAttribute("empleado", empleado);
-        model.addAttribute("documentos", documentosEmpleadoService.listarPorEmpleado(identificacion));
         model.addAttribute("tiposPorCategoria", tiposPorCategoria);
         model.addAttribute("tiposPorCategoriaJson", convertirAJson(tiposPorCategoria));
+        model.addAttribute("documentosPorTipoId", documentosPorTipoId);
+        model.addAttribute("tiposYaSubidosJson", convertirIdsAJson(documentosPorTipoId.keySet()));
         model.addAttribute("s3Disponible", documentosEmpleadoService.s3Disponible());
 
         return "documentosEmpleado";
@@ -78,11 +87,55 @@ public class DocumentosEmpleadoController {
             return "redirect:/documentos-empleado/" + identificacion + "?error=solo_pdf";
         }
 
+        boolean yaExiste = documentosEmpleadoRepository
+                .findByIdentificacionEmpleadoAndTipoId(identificacion, tipo).isPresent();
+
+        if (yaExiste) {
+            return "redirect:/documentos-empleado/" + identificacion + "?error=ya_existe";
+        }
+
         TipoDocumentoEmpleado tipoDocumento = tipoDocumentoEmpleadoRepository.findById(tipo)
                 .orElseThrow(() -> new IllegalArgumentException("Tipo de documento no válido"));
 
         try {
             documentosEmpleadoService.subirDocumento(identificacion, tipoDocumento,
+                    nombreOriginal, archivo.getBytes());
+            return "redirect:/documentos-empleado/" + identificacion + "?ok=1";
+        } catch (IOException | RuntimeException e) {
+            return "redirect:/documentos-empleado/" + identificacion + "?error=subida";
+        }
+    }
+
+    @PostMapping("/documentos-empleado/{identificacion}/{id}/editar")
+    public String editar(@PathVariable String identificacion,
+                          @PathVariable Integer id,
+                          @RequestParam Integer tipo,
+                          @RequestParam MultipartFile archivo,
+                          Authentication authentication) {
+        verificarAcceso(identificacion, authentication);
+
+        if (!documentosEmpleadoService.s3Disponible()) {
+            return "redirect:/documentos-empleado/" + identificacion + "?error=sin_s3";
+        }
+
+        if (archivo.isEmpty()) {
+            return "redirect:/documentos-empleado/" + identificacion + "?error=sin_archivo";
+        }
+
+        String contentType = archivo.getContentType();
+        String nombreOriginal = archivo.getOriginalFilename();
+        boolean esPdf = "application/pdf".equals(contentType)
+                && nombreOriginal != null && nombreOriginal.toLowerCase().endsWith(".pdf");
+
+        if (!esPdf) {
+            return "redirect:/documentos-empleado/" + identificacion + "?error=solo_pdf";
+        }
+
+        TipoDocumentoEmpleado tipoDocumento = tipoDocumentoEmpleadoRepository.findById(tipo)
+                .orElseThrow(() -> new IllegalArgumentException("Tipo de documento no válido"));
+
+        try {
+            documentosEmpleadoService.reemplazarDocumento(id, identificacion, tipoDocumento,
                     nombreOriginal, archivo.getBytes());
             return "redirect:/documentos-empleado/" + identificacion + "?ok=1";
         } catch (IOException | RuntimeException e) {
@@ -150,6 +203,20 @@ public class DocumentosEmpleadoController {
         }
 
         json.append("}");
+        return json.toString();
+    }
+
+    private String convertirIdsAJson(Set<Integer> ids) {
+        StringBuilder json = new StringBuilder("[");
+        boolean primero = true;
+        for (Integer id : ids) {
+            if (!primero) {
+                json.append(",");
+            }
+            primero = false;
+            json.append(id);
+        }
+        json.append("]");
         return json.toString();
     }
 

@@ -4,12 +4,17 @@ import com.empresa.maestra_dyd_boot.model.Empleados;
 import com.empresa.maestra_dyd_boot.model.TipoDocumentoEmpleado;
 import com.empresa.maestra_dyd_boot.model.DocumentosEmpleado;
 import com.empresa.maestra_dyd_boot.repository.DocumentosEmpleadoRepository;
+import com.empresa.maestra_dyd_boot.repository.DocumentosEmpleadoSpecifications;
 import com.empresa.maestra_dyd_boot.s3.S3ClientService;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Pattern;
 import java.text.Normalizer;
+import java.util.stream.Collectors;
 
 @Service
 public class DocumentosEmpleadoService {
@@ -34,6 +39,21 @@ public class DocumentosEmpleadoService {
         return documentosEmpleadoRepository.findByIdentificacionEmpleadoOrderByFechaSubidaDesc(identificacionEmpleado);
     }
 
+    public List<DocumentosEmpleado> buscarGlobal(String buscadorEmpleado, Integer tipoId,
+                                                  LocalDate fechaDesde, LocalDate fechaHasta) {
+
+        List<String> identificacionesCoincidentes = null;
+
+        if (buscadorEmpleado != null && !buscadorEmpleado.isBlank()) {
+            identificacionesCoincidentes = empleadosService.buscarCoincidencias(buscadorEmpleado);
+        }
+
+        var specification = DocumentosEmpleadoSpecifications
+                .conFiltros(identificacionesCoincidentes, tipoId, fechaDesde, fechaHasta);
+
+        return documentosEmpleadoRepository.findAll(specification, Sort.by("fechaSubida").descending());
+    }
+
     public DocumentosEmpleado buscarPorId(Integer id) {
         return documentosEmpleadoRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Documento no encontrado: " + id));
@@ -50,10 +70,10 @@ public class DocumentosEmpleadoService {
             extension = nombreOriginal.substring(punto);
         }
 
-        String nombre = normalizar(empleado.getNombreEmpleado());
-        String nombreFinal = normalizar(identificacionEmpleado + "_" + nombre) + extension;
+        String nombreTipo = normalizar(tipo.getNombre());
+        String nombreFinal = normalizar(identificacionEmpleado + "_" + nombreTipo) + extension;
 
-        String base = identificacionEmpleado + "_" + nombre;
+        String base = identificacionEmpleado + "_" + nombreTipo;
         String candidato = nombreFinal;
         int contador = 1;
         while (documentosEmpleadoRepository.existsByNombreArchivo(candidato)) {
@@ -75,6 +95,27 @@ public class DocumentosEmpleadoService {
         doc.setTipo(tipo);
 
         return documentosEmpleadoRepository.save(doc);
+    }
+
+    public DocumentosEmpleado reemplazarDocumento(Integer idDocumentoExistente, String identificacionEmpleado,
+                                                   TipoDocumentoEmpleado tipo, String nombreOriginal, byte[] contenido) {
+
+        DocumentosEmpleado existente = buscarPorId(idDocumentoExistente);
+
+        if (existente.getS3Key() != null && !existente.getS3Key().isBlank()) {
+            s3ClientService.eliminarArchivo(existente.getS3Key());
+        }
+        documentosEmpleadoRepository.deleteById(idDocumentoExistente);
+
+        return subirDocumento(identificacionEmpleado, tipo, nombreOriginal, contenido);
+    }
+
+    public Map<Integer, DocumentosEmpleado> documentosPorTipoId(String identificacionEmpleado) {
+        return listarPorEmpleado(identificacionEmpleado).stream()
+                .collect(Collectors.toMap(
+                        doc -> doc.getTipo().getId(),
+                        doc -> doc
+                ));
     }
 
     public byte[] descargarDocumento(String s3Key) {

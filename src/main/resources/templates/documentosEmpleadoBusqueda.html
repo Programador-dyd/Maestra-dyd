@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" type="text/css" th:href="@{/estilos/layout.css}">
+    <link rel="stylesheet" type="text/css" th:href="@{/estilos/modulos.css}">
+    <title>Buscar Documentos de Empleados</title>
+</head>
+<body>
+
+    <header th:replace="~{fragments/topbar :: topbar('empleados')}"></header>
+
+    <aside th:replace="~{fragments/sidebar :: sidebar('documentosEmpleadoBusqueda')}"></aside>
+
+    <main>
+
+        <div class="page-head">
+            <div class="page-head-left">
+                <div class="page-icon">
+                    <img th:src="@{/img/logo.png}" alt="">
+                </div>
+                <div>
+                    <h1>Buscar Documentos de Empleados</h1>
+                    <p class="subtitle-main">Encuentra documentos de cualquier empleado sin entrar a su ficha</p>
+                </div>
+            </div>
+            <div class="actions">
+                <a th:href="@{/empleados}" class="btn">⬅ Volver a Empleados</a>
+            </div>
+        </div>
+
+        <form method="get" th:action="@{/documentos-empleado-busqueda}" class="filters filters-busqueda-empleado">
+            <div class="field">
+                <label>Empleado (cédula o nombre)</label>
+                <input type="text" name="buscador" th:value="${buscador}" placeholder="Ej: 1122783242">
+            </div>
+
+            <div class="field">
+                <label>Categoría</label>
+                <select id="selectCategoriaBusqueda">
+                    <option value="">Todas</option>
+                    <option th:each="entrada : ${tiposPorCategoria}" th:value="${entrada.key}" th:text="${entrada.key}"></option>
+                </select>
+            </div>
+
+            <div class="field">
+                <label>Tipo de documento</label>
+                <select name="tipo" id="tipoSelectBusqueda">
+                    <option value="">Todos</option>
+                </select>
+            </div>
+
+            <div class="field">
+                <label>Subido desde</label>
+                <input type="date" name="fechaDesde" th:value="${fechaDesde}">
+            </div>
+
+            <div class="field">
+                <label>Subido hasta</label>
+                <input type="date" name="fechaHasta" th:value="${fechaHasta}">
+            </div>
+
+            <div class="filters-actions">
+                <button type="submit" class="btn primary">Buscar</button>
+                <a th:href="@{/documentos-empleado-busqueda}" class="btn">Limpiar</a>
+            </div>
+        </form>
+
+        <div class="table-wrap">
+            <table>
+                <thead>
+                <tr>
+                    <th>Empleado</th>
+                    <th>Tipo documento</th>
+                    <th>Nombre archivo</th>
+                    <th>Fecha subida</th>
+                    <th>Acciones</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="doc : ${documentos}">
+                    <td>
+                        <span th:text="${nombresPorIdentificacion.get(doc.identificacionEmpleado)}"></span>
+                        (<span th:text="${doc.identificacionEmpleado}"></span>)
+                    </td>
+                    <td th:text="${doc.tipo != null ? doc.tipo.nombre : ''}"></td>
+                    <td th:text="${doc.nombreArchivo}"></td>
+                    <td th:text="${doc.fechaSubida}"></td>
+                    <td>
+                        <div class="options-cell">
+                            <a th:href="@{/documentos-empleado/ver/{id}(id=${doc.id})}" target="_blank" class="btn">Ver</a>
+                            <a th:href="@{/documentos-empleado/{id}(id=${doc.identificacionEmpleado})}" class="btn">Ir a su ficha</a>
+                        </div>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <script th:inline="javascript">
+            const tiposPorCategoriaBusqueda = JSON.parse(/*[[${tiposPorCategoriaJson}]]*/ '{}');
+        </script>
+        <script th:src="@{/js/documentos-empleado-busqueda.js}"></script>
+
+    </main>
+
+</body>
+</html>

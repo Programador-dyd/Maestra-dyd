@@ -9,6 +9,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @Service
 public class EmpleadosService {
@@ -31,6 +32,15 @@ public class EmpleadosService {
     public Empleados buscarPorIdentificacion(String identificacion) {
         return empleadosRepository.findById(identificacion)
                 .orElseThrow(() -> new IllegalArgumentException("Empleado no encontrado: " + identificacion));
+    }
+
+    public List<String> buscarCoincidencias(String buscador) {
+        String buscadorMin = buscador.toLowerCase();
+        return empleadosRepository.findAll().stream()
+                .filter(e -> e.getIdentificacion().toLowerCase().contains(buscadorMin)
+                        || (e.getNombreEmpleado() != null && e.getNombreEmpleado().toLowerCase().contains(buscadorMin)))
+                .map(Empleados::getIdentificacion)
+                .toList();
     }
 
     public Empleados guardar(Empleados empleado) {
@@ -58,19 +68,19 @@ public class EmpleadosService {
         empleadosRepository.save(empleado);
     }
 
-    public void crearOVincularDesdeUsuario(String identificacion, String nombreCompleto, java.time.LocalDate fechaIngreso) {
-    empleadosRepository.findById(identificacion).ifPresentOrElse(
-        empleadoExistente -> {
-            // Ya existe (por ejemplo, importado del Excel) — no se sobrescribe, solo queda vinculado por la misma identificación.
-        },
-        () -> {
-            Empleados nuevo = new Empleados();
-            nuevo.setIdentificacion(identificacion);
-            nuevo.setNombreEmpleado(nombreCompleto);
-            nuevo.setFechaIngreso(fechaIngreso);
-            nuevo.setEstado("Activo");
-            empleadosRepository.save(nuevo);
-        }
-    );
-}
+    public void crearOVincularDesdeUsuario(String identificacion, String nombreCompleto, LocalDate fechaIngreso) {
+        empleadosRepository.findById(identificacion).ifPresentOrElse(
+            empleadoExistente -> {
+                // Ya existe (por ejemplo, importado del Excel) — no se sobrescribe, solo queda vinculado por la misma identificación.
+            },
+            () -> {
+                Empleados nuevo = new Empleados();
+                nuevo.setIdentificacion(identificacion);
+                nuevo.setNombreEmpleado(nombreCompleto);
+                nuevo.setFechaIngreso(fechaIngreso);
+                nuevo.setEstado("Activo");
+                empleadosRepository.save(nuevo);
+            }
+        );
+    }
 }

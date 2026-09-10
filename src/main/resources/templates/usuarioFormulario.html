@@ -63,10 +63,17 @@
                         <label>Fecha de ingreso</label>
                         <input type="date" name="fechaIngresoEmpleado" id="fechaIngresoEmpleado" disabled>
                     </div>
-                    <div class="form-field">
+                    <div class="form-field" th:if="${esModificar}">
+                        <label>
+                            <input type="checkbox" id="cambiarClaveCheck" style="width:auto; margin-right:6px;">
+                            Cambiar contraseña
+                        </label>
+                        <input type="password" th:field="*{clave}" id="claveInput" disabled placeholder="Nueva contraseña">
+                    </div>
+
+                    <div class="form-field" th:unless="${esModificar}">
                         <label>Contraseña</label>
-                        <input type="password" th:field="*{clave}"
-                               th:placeholder="${esModificar} ? 'Dejar en blanco para no cambiarla' : ''">
+                        <input type="password" th:field="*{clave}" required>
                     </div>
 
                     <div class="form-field form-field-submit">
