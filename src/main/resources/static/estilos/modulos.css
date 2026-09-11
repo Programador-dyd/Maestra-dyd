@@ -529,3 +529,37 @@
     grid-template-columns: 1fr;
   }
 }
+
+.table-docs-empleado table {
+  table-layout: fixed;
+  width: 100% !important;
+}
+
+.table-docs-empleado table th:nth-child(1),
+.table-docs-empleado table td:nth-child(1) {
+  width: 260px;
+}
+
+.table-docs-empleado table th:nth-child(2),
+.table-docs-empleado table td:nth-child(2) {
+  width: 140px;
+}
+
+.table-docs-empleado table th:nth-child(3),
+.table-docs-empleado table td:nth-child(3) {
+  width: auto;
+}
+
+.table-docs-empleado table td,
+.table-docs-empleado table th {
+  overflow: hidden;
+  word-wrap: break-word;
+}
+
+.table-docs-empleado table td:nth-child(3) {
+  white-space: normal;
+}
+
+.table-docs-empleado table td:nth-child(3) .options-cell {
+  flex-wrap: wrap;
+}

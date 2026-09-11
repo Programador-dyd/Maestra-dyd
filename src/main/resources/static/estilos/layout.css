@@ -256,6 +256,7 @@ body.sidebar-open .sidebar-nav a span {
 .icon-activo { background-image: url('/icons/icon_activo.png'); }
 .icon-inactivo { background-image: url('/icons/icon_inactivo.png'); }
 .icon-busqueda { background-image: url('/icons/icon_busqueda.png'); }
+.icon-archivar-acreedor { background-image: url('/icons/icon_archivar_acreedor.png'); }
 
 .sidebar-overlay {
   display: none;

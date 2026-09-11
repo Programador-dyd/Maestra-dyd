@@ -71,16 +71,15 @@ public class DocumentosEmpleadoService {
         }
 
         String nombreTipo = normalizar(tipo.getNombre());
-        String nombreFinal = normalizar(identificacionEmpleado + "_" + nombreTipo) + extension;
+        String nombreBase = normalizar(identificacionEmpleado + "_" + nombreTipo) + extension;
 
-        String base = identificacionEmpleado + "_" + nombreTipo;
-        String candidato = nombreFinal;
-        int contador = 1;
+        String candidato = nombreBase;
+        int contador = 2;
         while (documentosEmpleadoRepository.existsByNombreArchivo(candidato)) {
-            candidato = base + "(" + contador + ")" + extension;
+            candidato = nombreBase + " (" + contador + ")";
             contador++;
         }
-        nombreFinal = candidato;
+        String nombreFinal = candidato;
 
         String key = "empleados/" + identificacionEmpleado + "/" + nombreFinal;
 
@@ -97,25 +96,9 @@ public class DocumentosEmpleadoService {
         return documentosEmpleadoRepository.save(doc);
     }
 
-    public DocumentosEmpleado reemplazarDocumento(Integer idDocumentoExistente, String identificacionEmpleado,
-                                                   TipoDocumentoEmpleado tipo, String nombreOriginal, byte[] contenido) {
-
-        DocumentosEmpleado existente = buscarPorId(idDocumentoExistente);
-
-        if (existente.getS3Key() != null && !existente.getS3Key().isBlank()) {
-            s3ClientService.eliminarArchivo(existente.getS3Key());
-        }
-        documentosEmpleadoRepository.deleteById(idDocumentoExistente);
-
-        return subirDocumento(identificacionEmpleado, tipo, nombreOriginal, contenido);
-    }
-
-    public Map<Integer, DocumentosEmpleado> documentosPorTipoId(String identificacionEmpleado) {
-        return listarPorEmpleado(identificacionEmpleado).stream()
-                .collect(Collectors.toMap(
-                        doc -> doc.getTipo().getId(),
-                        doc -> doc
-                ));
+    public Map<Integer, List<DocumentosEmpleado>> documentosPorTipoId(String identificacionEmpleado) {
+    return listarPorEmpleado(identificacionEmpleado).stream()
+            .collect(Collectors.groupingBy(doc -> doc.getTipo().getId()));
     }
 
     public byte[] descargarDocumento(String s3Key) {

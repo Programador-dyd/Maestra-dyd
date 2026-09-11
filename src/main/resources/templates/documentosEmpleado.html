@@ -39,7 +39,6 @@
         <div th:if="${param.error != null and param.error[0] == 'sin_archivo'}" class="msg msg-error" style="max-width:500px;">Selecciona un archivo.</div>
         <div th:if="${param.error != null and param.error[0] == 'subida'}" class="msg msg-error" style="max-width:500px;">Ocurrió un error al subir el archivo.</div>
         <div th:if="${param.error != null and param.error[0] == 'solo_pdf'}" class="msg msg-error" style="max-width:500px;">Solo se permiten archivos PDF.</div>
-        <div th:if="${param.error != null and param.error[0] == 'ya_existe'}" class="msg msg-error" style="max-width:500px;">Ese tipo de documento ya fue subido. Edítalo desde la tabla en vez de subir uno nuevo.</div>
 
         <div th:if="${!s3Disponible}" class="msg msg-info" style="max-width:500px;">
             ⚠ El almacenamiento en AWS S3 aún no está configurado. La subida de documentos no estará disponible hasta que el administrador complete la configuración.
@@ -81,83 +80,55 @@
             </form>
         </div>
 
-        <div class="table-wrap" th:each="entradaCategoria : ${tiposPorCategoria}" style="margin-bottom:20px;">
+        <div class="table-wrap table-docs-empleado" th:each="entradaCategoria : ${tiposPorCategoria}" style="margin-bottom:20px;">
             <h3 style="margin:14px 0 10px 4px; font-size:15px; color:#172033;" th:text="${entradaCategoria.key}"></h3>
             <table>
                 <thead>
                 <tr>
                     <th>Tipo de documento</th>
                     <th>Estado</th>
-                    <th>Archivo / Fecha</th>
-                    <th>Acciones</th>
+                    <th>Archivos</th>
                 </tr>
                 </thead>
                 <tbody>
                 <tr th:each="tipoDoc : ${entradaCategoria.value}"
-                    th:with="doc=${documentosPorTipoId.get(tipoDoc.id)}"
-                    th:style="${doc != null} ? 'background-color:#ecfdf3;' : 'background-color:#fffbea;'">
+                    th:with="listaDocs=${documentosPorTipoId.get(tipoDoc.id)}"
+                    th:style="${listaDocs != null and !listaDocs.isEmpty()} ? 'background-color:#ecfdf3;' : 'background-color:#fffbea;'">
 
-                    <td th:text="${tipoDoc.nombre}"></td>
+                    <td th:text="${tipoDoc.nombre}" style="vertical-align:top; padding-top:12px;"></td>
 
-                    <td>
-                        <span th:if="${doc != null}" style="color:#166534; font-weight:600;">✔ Subido</span>
-                        <span th:if="${doc == null}" style="color:#b91c1c; font-weight:600;">Sin subir</span>
+                    <td style="vertical-align:top; padding-top:12px;">
+                        <span th:if="${listaDocs != null and !listaDocs.isEmpty()}" style="color:#166534; font-weight:600;"
+                              th:text="'✔ ' + ${listaDocs.size()} + ' subido(s)'"></span>
+                        <span th:if="${listaDocs == null or listaDocs.isEmpty()}" style="color:#b91c1c; font-weight:600;">Sin subir</span>
                     </td>
 
                     <td>
-                        <span th:if="${doc != null}" th:text="${doc.nombreArchivo} + ' — ' + ${doc.fechaSubida}"></span>
-                        <span th:if="${doc == null}">—</span>
-                    </td>
+                        <div th:if="${listaDocs != null and !listaDocs.isEmpty()}">
+                            <div th:each="doc : ${listaDocs}" class="options-cell" style="margin-bottom:6px;">
+                                <span th:text="${doc.nombreArchivo}"></span>
+                                <span style="color:#94a3b8; font-size:12px;" th:text="'(' + ${doc.fechaSubida} + ')'"></span>
 
-                    <td>
-                        <div class="options-cell" th:if="${doc != null}">
-                            <a th:href="@{/documentos-empleado/ver/{id}(id=${doc.id})}" target="_blank" class="btn">Ver</a>
+                                <a th:href="@{/documentos-empleado/ver/{id}(id=${doc.id})}" target="_blank" class="btn">Ver</a>
 
-                            <button type="button" class="btn primary btn-editar-doc"
-                                    th:attr="data-id=${doc.id}, data-tipo=${tipoDoc.id}, data-tiponombre=${tipoDoc.nombre}">
-                                Editar
-                            </button>
-
-                            <form th:action="@{/documentos-empleado/{id}/eliminar(id=${doc.id})}" method="post"
-                                  onsubmit="return confirm('¿Eliminar este documento?');" style="display:inline;">
-                                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
-                                <input type="hidden" name="identificacion" th:value="${empleado.identificacion}">
-                                <input type="hidden" name="s3Key" th:value="${doc.s3Key}">
-                                <button type="submit" class="btn danger">Eliminar</button>
-                            </form>
+                                <form th:action="@{/documentos-empleado/{id}/eliminar(id=${doc.id})}" method="post"
+                                      onsubmit="return confirm('¿Eliminar este documento?');" style="display:inline;">
+                                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                                    <input type="hidden" name="identificacion" th:value="${empleado.identificacion}">
+                                    <input type="hidden" name="s3Key" th:value="${doc.s3Key}">
+                                    <button type="submit" class="btn danger">Eliminar</button>
+                                </form>
+                            </div>
                         </div>
-                        <span th:if="${doc == null}" style="color:#94a3b8;">—</span>
+                        <span th:if="${listaDocs == null or listaDocs.isEmpty()}" style="color:#94a3b8;">—</span>
                     </td>
                 </tr>
                 </tbody>
             </table>
         </div>
 
-        <!-- Modal simple para editar (reemplazar archivo) -->
-        <div id="modalEditar" style="display:none; position:fixed; inset:0; background:rgba(15,23,42,0.5); z-index:300; align-items:center; justify-content:center;">
-            <div class="form-card" style="max-width:420px; width:90%;">
-                <h3 id="modalEditarTitulo" style="margin:0 0 16px;">Reemplazar documento</h3>
-                <form id="formEditar" method="post" enctype="multipart/form-data">
-                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
-                    <input type="hidden" name="tipo" id="inputTipoEditar">
-
-                    <div class="form-field">
-                        <label>Nuevo archivo (solo PDF)</label>
-                        <input type="file" name="archivo" accept="application/pdf,.pdf" required>
-                    </div>
-
-                    <div class="form-field-submit" style="margin-top:16px; display:flex; gap:10px; justify-content:flex-end;">
-                        <button type="button" class="btn" id="btnCancelarEditar">Cancelar</button>
-                        <input type="submit" value="Reemplazar">
-                    </div>
-                </form>
-            </div>
-        </div>
-
         <script th:inline="javascript">
             const tiposPorCategoria = JSON.parse(/*[[${tiposPorCategoriaJson}]]*/ '{}');
-            const tiposYaSubidos = JSON.parse(/*[[${tiposYaSubidosJson}]]*/ '[]');
-            const urlBaseEditar = /*[[@{/documentos-empleado/{id}/(id=${empleado.identificacion})}]]*/ '';
         </script>
         <script th:src="@{/js/documentos-empleado.js}"></script>
 
