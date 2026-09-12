@@ -44,7 +44,7 @@
             <div class="field">
                 <label>Estado</label>
                 <select name="estado">
-                    <option value="" th:selected="${estado == ''}">Todos</option>
+                    <option value="TODOS" th:selected="${estado == 'TODOS'}">Todos</option>
                     <option value="Activo" th:selected="${estado == 'Activo'}">Activo</option>
                     <option value="Inactivo" th:selected="${estado == 'Inactivo'}">Inactivo</option>
                 </select>
@@ -80,6 +80,19 @@
                             <a th:href="@{/documentos-empleado/{id}(id=${empleado.identificacion})}" class="btn primary">
                                 Agregar documentación
                             </a>
+
+                            <button th:if="${empleado.estado == 'Activo'}" type="button" class="btn danger"
+                                    th:attr="data-identificacion=${empleado.identificacion}"
+                                    onclick="abrirModalInactivar(this)">
+                                Inactivar
+                            </button>
+
+                            <form th:if="${empleado.estado == 'Inactivo'}"
+                                  th:action="@{/empleados/{id}/restaurar(id=${empleado.identificacion})}" method="post"
+                                  onsubmit="return confirm('¿Desea restaurar este empleado?');" style="display:inline;">
+                                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                                <button type="submit" class="btn">Restaurar</button>
+                            </form>
                         </div>
                     </td>
                 </tr>
@@ -89,15 +102,39 @@
 
         <div class="pagination-bar">
             <a th:if="${paginaActual > 1}"
-               th:href="@{/empleados(pagina=${paginaActual - 1}, buscador=${buscador})}" class="btn">Anterior</a>
+               th:href="@{/empleados(pagina=${paginaActual - 1}, buscador=${buscador}, estado=${estado}, fechaIngreso=${fechaIngreso})}" class="btn">Anterior</a>
 
             <span>Página <strong th:text="${paginaActual}"></strong> de <strong th:text="${totalPaginas}"></strong></span>
 
             <a th:if="${paginaActual < totalPaginas}"
-               th:href="@{/empleados(pagina=${paginaActual + 1}, buscador=${buscador})}" class="btn">Siguiente</a>
+               th:href="@{/empleados(pagina=${paginaActual + 1}, buscador=${buscador}, estado=${estado}, fechaIngreso=${fechaIngreso})}" class="btn">Siguiente</a>
 
             <span>Total: <strong th:text="${totalRegistros}"></strong></span>
         </div>
+
+        <dialog id="modalInactivar" style="border:none; border-radius:16px; padding:0; max-width:400px; width:90%;">
+            <form id="formInactivar" method="post" style="padding:24px;">
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                <h3 style="margin:0 0 16px; font-size:16px; color:#172033;">Inactivar empleado</h3>
+                <div class="form-field" style="margin-bottom:16px;">
+                    <label>Fecha de retiro</label>
+                    <input type="date" name="fechaRetiro" required>
+                </div>
+                <div style="display:flex; justify-content:flex-end; gap:10px;">
+                    <button type="button" class="btn" onclick="document.getElementById('modalInactivar').close()">Cancelar</button>
+                    <button type="submit" class="btn danger">Confirmar</button>
+                </div>
+            </form>
+        </dialog>
+
+        <script>
+            function abrirModalInactivar(boton) {
+                var identificacion = boton.getAttribute('data-identificacion');
+                var form = document.getElementById('formInactivar');
+                form.action = '/empleados/' + identificacion + '/archivar';
+                document.getElementById('modalInactivar').showModal();
+            }
+        </script>
 
     </main>
 

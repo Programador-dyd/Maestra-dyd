@@ -27,15 +27,16 @@ public class ClientesController {
     }
 
     @GetMapping("/clientes")
-    public String listarActivos(
+    public String listar(
             @RequestParam(required = false) String buscador,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fechaPrograma,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fechaSiesa,
-            @RequestParam(required = false) String estado,
+            @RequestParam(required = false) String estadoDocumentacion,
+            @RequestParam(defaultValue = "Activo") String estado,
             @RequestParam(defaultValue = "1") int pagina,
             Model model) {
 
-        Page<Clientes> resultado = clientesService.buscarActivosPaginado(buscador, fechaPrograma, fechaSiesa, estado, pagina);
+        Page<Clientes> resultado = clientesService.buscarPaginado(buscador, fechaPrograma, fechaSiesa, estadoDocumentacion, estado, pagina);
 
         model.addAttribute("clientes", resultado.getContent());
         model.addAttribute("paginaActual", pagina);
@@ -45,17 +46,13 @@ public class ClientesController {
         model.addAttribute("buscador", buscador == null ? "" : buscador);
         model.addAttribute("fechaPrograma", fechaPrograma);
         model.addAttribute("fechaSiesa", fechaSiesa);
+        model.addAttribute("estadoDocumentacion", estadoDocumentacion == null ? "" : estadoDocumentacion);
         model.addAttribute("estado", estado == null ? "" : estado);
 
         model.addAttribute("oneDriveConectado", oneDriveTokenService.hayConexionActiva());
 
         return "clientes";
     }
-
-    @PostMapping("/clientes/{nit}/archivar")
-    public String archivar(@PathVariable("nit") String nit) {
-        clientesService.archivar(nit);
-        return "redirect:/clientes";
-    }
+    
 
 }

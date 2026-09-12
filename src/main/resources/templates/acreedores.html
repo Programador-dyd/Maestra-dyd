@@ -32,10 +32,18 @@
             </div>
         </div>
 
-        <form method="get" th:action="@{/acreedores}" class="filters">
+        <form method="get" th:action="@{/acreedores}" class="filters filters-5">
             <div class="field">
-                <label>Buscar nit/razón social</label>
-                <input type="text" name="buscador" th:value="${buscador}" placeholder="Buscar por NIT o Razón Social">
+        <label>Buscar nit/razón social</label>
+        <input type="text" name="buscador" th:value="${buscador}" placeholder="Buscar por NIT o Razón Social">
+            </div>
+            <div class="field">
+                <label>Estado</label>
+                <select name="estado">
+                    <option value="TODOS" th:selected="${estado == 'TODOS'}">Todos</option>
+                    <option value="Activo" th:selected="${estado == 'Activo'}">Activos</option>
+                    <option value="Inactivo" th:selected="${estado == 'Inactivo'}">Inactivos</option>
+                </select>
             </div>
             <div class="field">
                 <label>Fecha ingreso</label>
@@ -116,12 +124,12 @@
 
         <div class="pagination-bar">
             <a th:if="${paginaActual > 1}"
-               th:href="@{/acreedores(pagina=${paginaActual - 1}, buscador=${buscador})}" class="btn">Anterior</a>
+               th:href="@{/acreedores(pagina=${paginaActual - 1}, buscador=${buscador}, estado=${estado}, fechaPrograma=${fechaPrograma}, fechaSiesa=${fechaSiesa}, estadoDocumentacion=${estadoDocumentacion})}" class="btn">Anterior</a>
 
             <span>Página <strong th:text="${paginaActual}"></strong> de <strong th:text="${totalPaginas}"></strong></span>
 
             <a th:if="${paginaActual < totalPaginas}"
-               th:href="@{/acreedores(pagina=${paginaActual + 1}, buscador=${buscador})}" class="btn">Siguiente</a>
+               th:href="@{/acreedores(pagina=${paginaActual + 1}, buscador=${buscador}, estado=${estado}, fechaPrograma=${fechaPrograma}, fechaSiesa=${fechaSiesa}, estadoDocumentacion=${estadoDocumentacion})}" class="btn">Siguiente</a>
 
             <span>Total: <strong th:text="${totalRegistros}"></strong></span>
         </div>

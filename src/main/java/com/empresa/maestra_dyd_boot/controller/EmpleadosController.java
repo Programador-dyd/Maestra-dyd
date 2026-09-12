@@ -45,8 +45,10 @@ public class EmpleadosController {
     }
 
     @PostMapping("/empleados/{identificacion}/archivar")
-    public String archivar(@PathVariable("identificacion") String identificacion) {
-        empleadosService.archivar(identificacion);
+    public String archivar(
+            @PathVariable("identificacion") String identificacion,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fechaRetiro) {
+        empleadosService.archivar(identificacion, fechaRetiro);
         return "redirect:/empleados";
     }
 

@@ -108,6 +108,22 @@
   align-items: end;
 }
 
+.filters.filters-5 {
+  grid-template-columns: 2fr 1fr 1fr;
+}
+
+@media (max-width: 900px) {
+  .filters.filters-5 {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .filters.filters-5 {
+    grid-template-columns: 1fr;
+  }
+}
+
 .filters .field {
   display: flex;
   flex-direction: column;
@@ -537,17 +553,27 @@
 
 .table-docs-empleado table th:nth-child(1),
 .table-docs-empleado table td:nth-child(1) {
-  width: 260px;
+  width: 40%;
 }
 
 .table-docs-empleado table th:nth-child(2),
 .table-docs-empleado table td:nth-child(2) {
-  width: 140px;
+  width: 20%;
+  text-align: center;
 }
 
 .table-docs-empleado table th:nth-child(3),
 .table-docs-empleado table td:nth-child(3) {
-  width: auto;
+  width: 40%;
+  text-align: center;
+}
+
+.table-docs-empleado table th {
+  text-align: center;
+}
+
+.table-docs-empleado table th:nth-child(1) {
+  text-align: left;
 }
 
 .table-docs-empleado table td,
@@ -562,4 +588,10 @@
 
 .table-docs-empleado table td:nth-child(3) .options-cell {
   flex-wrap: wrap;
+}
+
+.table-docs-empleado table td:nth-child(3) .options-cell span:first-child {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  flex-shrink: 1;
 }

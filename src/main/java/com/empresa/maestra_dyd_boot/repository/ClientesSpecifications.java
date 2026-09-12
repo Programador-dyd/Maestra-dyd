@@ -15,9 +15,11 @@ public class ClientesSpecifications {
                                                        LocalDate fechaSiesa, String estadoDocumentacion) {
 
         return (root, query, cb) -> {
-            var predicados = cb.conjunction();
+            var predicados = cb.equal(cb.literal(1), 1);
 
-            predicados = cb.and(predicados, cb.equal(root.get("estado"), estado));
+            if (estado != null && !estado.isBlank() && !estado.equals("TODOS")) {
+                predicados = cb.and(predicados, cb.equal(root.get("estado"), estado));
+            }
 
             if (buscador != null && !buscador.isBlank()) {
                 String patron = "%" + buscador.toLowerCase() + "%";

@@ -54,10 +54,10 @@ public class EmpleadosService {
         return empleadosRepository.save(datosNuevos);
     }
 
-    public void archivar(String identificacion) {
+    public void archivar(String identificacion, LocalDate fechaRetiro) {
         Empleados empleado = buscarPorIdentificacion(identificacion);
         empleado.setEstado("Inactivo");
-        empleado.setFechaRetiro(LocalDate.now());
+        empleado.setFechaRetiro(fechaRetiro != null ? fechaRetiro : LocalDate.now());
         empleadosRepository.save(empleado);
     }
 

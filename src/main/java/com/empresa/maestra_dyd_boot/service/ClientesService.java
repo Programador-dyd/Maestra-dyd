@@ -21,20 +21,8 @@ public class ClientesService {
         this.clientesRepository = clientesRepository;
     }
 
-    public Page<Clientes> buscarActivosPaginado(String buscador, LocalDate fechaPrograma,
-                                                 LocalDate fechaSiesa, String estadoDocumentacion,
-                                                 int pagina) {
-        return buscarPaginado("Activo", buscador, fechaPrograma, fechaSiesa, estadoDocumentacion, pagina);
-    }
-
-    public Page<Clientes> buscarArchivadosPaginado(String buscador, LocalDate fechaPrograma,
-                                                    LocalDate fechaSiesa, String estadoDocumentacion,
-                                                    int pagina) {
-        return buscarPaginado("Inactivo", buscador, fechaPrograma, fechaSiesa, estadoDocumentacion, pagina);
-    }
-
-    private Page<Clientes> buscarPaginado(String estado, String buscador, LocalDate fechaPrograma,
-                                           LocalDate fechaSiesa, String estadoDocumentacion, int pagina) {
+    public Page<Clientes> buscarPaginado(String buscador, LocalDate fechaPrograma, LocalDate fechaSiesa,
+                                          String estadoDocumentacion, String estado, int pagina) {
 
         int paginaIndex = Math.max(pagina - 1, 0); // Spring pagina desde 0, el usuario ve desde 1
 

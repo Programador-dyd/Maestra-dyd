@@ -11,18 +11,18 @@
           <i class="icon-inicio"></i> <span>Inicio</span>
         </a>
 
-        <details class="nav-group" th:attr="open=${active == 'clientes' or active == 'clientesArchivados'}">
+        <details class="nav-group" th:attr="open=${active == 'clientes'}">
           <summary class="nav-group-toggle" title="Clientes"
-                  th:classappend="${active == 'clientes' or active == 'clientesArchivados'} ? 'active' : ''">
+                  th:classappend="${active == 'clientes'} ? 'active' : ''">
             <i class="icon-clientes"></i>
             <span>Clientes</span>
             <span class="nav-group-caret" aria-hidden="true">▾</span>
           </summary>
           <nav class="nav-submenu">
-              <a th:href="@{/clientes}" th:classappend="${active}=='clientes' ? 'active' : ''" title="Clientes activos">
+              <a th:href="@{/clientes(estado='Activo')}" th:classappend="${active == 'clientes' and estado != 'Inactivo'} ? 'active' : ''" title="Clientes activos">
                 <i class="icon-activo"></i> <span>Clientes activos</span>
               </a>
-              <a th:href="@{/clientes/archivados}" th:classappend="${active}=='clientesArchivados' ? 'active' : ''" title="Clientes inactivos">
+              <a th:href="@{/clientes(estado='Inactivo')}" th:classappend="${active == 'clientes' and estado == 'Inactivo'} ? 'active' : ''" title="Clientes inactivos">
                 <i class="icon-inactivo"></i> <span>Clientes inactivos</span>
               </a>
           </nav>

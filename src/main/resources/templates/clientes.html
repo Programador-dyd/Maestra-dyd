@@ -27,21 +27,30 @@
                     <img th:src="@{/img/logo.png}" alt="">
                 </div>
                 <div>
-                    <h1>Lista de clientes activos</h1>
+                    <h1>Lista de clientes</h1>
                     <p class="subtitle-main">Gestiona la información de tus clientes</p>
                 </div>
             </div>
             <div class="actions">
-                <a th:href="@{/clientes/archivados}" class="btn">Ver clientes inactivos</a>
+                <a th:if="${estado != 'Inactivo'}" th:href="@{/clientes(estado='Inactivo')}" class="btn">Ver inactivos</a>
+                <a th:if="${estado == 'Inactivo'}" th:href="@{/clientes(estado='Activo')}" class="btn">Mostrar activos</a>
                 <a th:if="${!oneDriveConectado}" th:href="@{/onedrive/conectar}" class="btn">Conectar OneDrive</a>
                 <span th:if="${oneDriveConectado}" class="btn" style="cursor:default;">✔ OneDrive conectado</span>
             </div>
         </div>
 
-        <form method="get" th:action="@{/clientes}" class="filters">
+        <form method="get" th:action="@{/clientes}" class="filters filters-5">
             <div class="field">
                 <label>Buscar nit/razón social</label>
                 <input type="text" name="buscador" th:value="${buscador}" placeholder="Buscar por NIT o Razón Social">
+            </div>
+            <div class="field">
+                <label>Estado</label>
+                <select name="estado">
+                    <option value="TODOS" th:selected="${estado == 'TODOS'}">Todos</option>
+                    <option value="Activo" th:selected="${estado == 'Activo'}">Activos</option>
+                    <option value="Inactivo" th:selected="${estado == 'Inactivo'}">Inactivos</option>
+                </select>
             </div>
             <div class="field">
                 <label>Fecha ingreso</label>
@@ -53,10 +62,10 @@
             </div>
             <div class="field">
                 <label>Estado documento</label>
-                <select name="estado">
+                <select name="estadoDocumentacion">
                     <option value="">Todos</option>
-                    <option value="COMPLETO" th:selected="${estado == 'COMPLETO'}">Completo</option>
-                    <option value="INCOMPLETO" th:selected="${estado == 'INCOMPLETO'}">Incompleto</option>
+                    <option value="COMPLETO" th:selected="${estadoDocumentacion == 'COMPLETO'}">Completo</option>
+                    <option value="INCOMPLETO" th:selected="${estadoDocumentacion == 'INCOMPLETO'}">Incompleto</option>
                 </select>
             </div>
             <div class="filters-actions">
@@ -114,12 +123,12 @@
 
         <div class="pagination-bar">
             <a th:if="${paginaActual > 1}"
-               th:href="@{/clientes(pagina=${paginaActual - 1}, buscador=${buscador})}" class="btn">Anterior</a>
+               th:href="@{/clientes(pagina=${paginaActual - 1}, buscador=${buscador}, estado=${estado}, fechaPrograma=${fechaPrograma}, fechaSiesa=${fechaSiesa}, estadoDocumentacion=${estadoDocumentacion})}" class="btn">Anterior</a>
 
             <span>Página <strong th:text="${paginaActual}"></strong> de <strong th:text="${totalPaginas}"></strong></span>
 
             <a th:if="${paginaActual < totalPaginas}"
-               th:href="@{/clientes(pagina=${paginaActual + 1}, buscador=${buscador})}" class="btn">Siguiente</a>
+               th:href="@{/clientes(pagina=${paginaActual + 1}, buscador=${buscador}, estado=${estado}, fechaPrograma=${fechaPrograma}, fechaSiesa=${fechaSiesa}, estadoDocumentacion=${estadoDocumentacion})}" class="btn">Siguiente</a>
 
             <span>Total: <strong th:text="${totalRegistros}"></strong></span>
         </div>

@@ -15,7 +15,7 @@ public class ProveedoresSpecifications {
                                                           String estado) {
 
         return (root, query, cb) -> {
-            var predicados = cb.conjunction();
+            var predicados = cb.equal(cb.literal(1), 1);
 
             if (buscador != null && !buscador.isBlank()) {
                 String patron = "%" + buscador.toLowerCase() + "%";
@@ -36,7 +36,7 @@ public class ProveedoresSpecifications {
                 predicados = cb.and(predicados, cb.equal(root.get("estadoDocumentacion"), estadoDocumentacion));
             }
 
-            if (estado != null && !estado.isBlank()) {
+            if (estado != null && !estado.isBlank() && !estado.equals("TODOS")) {
                 predicados = cb.and(predicados, cb.equal(root.get("estado"), estado));
             }
 
